@@ -6,13 +6,14 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<StackPane xmlns="http://javafx.com/javafx"
+<VBox xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="vafilonov.msd.controllers.MainSceneController"
             prefHeight="400.0" prefWidth="600.0">
 
             <Button fx:id="button" text="Don't push me" onMouseClicked="#buttonClickHandler" />
-            <Label fx:id="label" text="" />
+            <Label fx:id="label" />
+            <TextArea fx:id="area" />
 
 
-</StackPane>
+</VBox>
