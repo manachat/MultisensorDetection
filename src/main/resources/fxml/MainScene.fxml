@@ -1,19 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="vafilonov.msd.controllers.MainSceneController"
-            prefHeight="400.0" prefWidth="600.0">
+<?import javafx.scene.control.skin.TableHeaderRow?>
+<GridPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+          fx:controller="vafilonov.msd.controllers.MainSceneController" gridLinesVisible="true">
+    <Button fx:id="button" onMouseClicked="#buttonClickHandler"  text="Don't push me" prefWidth="400" minWidth="200"
+            GridPane.columnIndex="0"/>
 
-            <Button fx:id="button" text="Don't push me" onMouseClicked="#buttonClickHandler" />
-            <Label fx:id="label" />
-            <TextArea fx:id="area" />
+    <ImageView fx:id="view"  fitHeight="900"  fitWidth="1300" pickOnBounds="true" preserveRatio="true"
+               GridPane.columnIndex="1"/>
 
 
-</VBox>
+    <rowConstraints>
+        <RowConstraints />
+        <RowConstraints />
+    </rowConstraints>
+
+    <columnConstraints>
+        <ColumnConstraints />
+        <ColumnConstraints />
+        <ColumnConstraints />
+    </columnConstraints>
+
+</GridPane>
