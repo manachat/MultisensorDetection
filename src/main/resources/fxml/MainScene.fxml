@@ -7,11 +7,31 @@
 <?import javafx.scene.control.skin.TableHeaderRow?>
 <GridPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
           fx:controller="vafilonov.msd.controllers.MainSceneController" gridLinesVisible="true">
+
+    <MenuBar prefHeight="25.0" GridPane.columnSpan="3">
+        <menus>
+            <Menu mnemonicParsing="false" text="File">
+                <items>
+                    <MenuItem fx:id="saveMenu" mnemonicParsing="false" onAction="#saveMenuHandler" text="Save" />
+                    <MenuItem fx:id="saveAsMenu" mnemonicParsing="false" onAction="#saveAsMenuHandler" text="Save as..." />
+                    <MenuItem fx:id="loadMenu" mnemonicParsing="false" onAction="#loadMenuHandler" text="Load" />
+                </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Help">
+                <items>
+                    <MenuItem fx:id="infoMenu" mnemonicParsing="false" onAction="#infoMenuHandler" text="Справка" />
+                    <MenuItem fx:id="aboutMenu" mnemonicParsing="false" onAction="#aboutMenuHandler" text="О разработчике" />
+                </items>
+            </Menu>
+        </menus>
+    </MenuBar>
+
+
     <Button fx:id="button" onMouseClicked="#buttonClickHandler"  text="Don't push me" prefWidth="400" minWidth="200"
-            GridPane.columnIndex="0"/>
+            GridPane.columnIndex="0" GridPane.rowIndex="1"/>
 
     <ImageView fx:id="view"  fitHeight="900"  fitWidth="1300" pickOnBounds="true" preserveRatio="true"
-               GridPane.columnIndex="1"/>
+               GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
 
     <rowConstraints>
