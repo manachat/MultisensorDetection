@@ -15,6 +15,7 @@ import java.util.Properties;
 public class Main extends Application {
 
     public static Scene scene;
+    public static Stage stage;
 
     public static void main(String[] args) {
         Properties prop = new Properties();
@@ -33,6 +34,8 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+
+        Main.stage = stage;
 
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
