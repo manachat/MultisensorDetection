@@ -7,7 +7,8 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import vafilonov.msd.controllers.MainSceneController;
 
-import java.awt.*;
+import java.awt.Toolkit;
+import java.awt.Dimension;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;

@@ -7,7 +7,7 @@
 
 <GridPane gridLinesVisible="true" prefHeight="425.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vafilonov.msd.controllers.MainSceneController">
 
-    <MenuBar prefHeight="25.0" GridPane.columnSpan="3">
+    <MenuBar prefHeight="25.0" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="3">
         <menus>
             <Menu mnemonicParsing="false" text="File">
                 <items>
@@ -25,44 +25,48 @@
         </menus>
     </MenuBar>
     
-   <VBox prefHeight="400.0" prefWidth="100.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
+   <VBox fx:id="fileVBox" prefHeight="400.0" prefWidth="200.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
       <children>
           <HBox>
               <children>
                   <Label alignment="CENTER" text="Period 1:" />
-                  <Button fx:id="fileChooseT1" text="Choose files" onMouseClicked="#fileChooseT1Click"/>
+                  <Button fx:id="fileChooseT1" onMouseClicked="#fileChooseT1Click" text="Choose files" />
               </children>
           </HBox>
-         <ScrollPane minWidth="200.0" prefHeight="200.0">
+         <ScrollPane minHeight="200" minWidth="200.0">
              <content>
-                 <VBox fx:id="vBoxT1">
+                 <VBox fx:id="vBoxT1" spacing="5.0">
                      <children>
-                         <Label prefWidth="200" text="B1" />
-                         <ComboBox fx:id="b1ComboBoxT1"/>
+                         <Label prefWidth="200" text="B1">
+                            <VBox.margin>
+                                <Insets left="10.0" />
+                            </VBox.margin>
+                         </Label>
+                         <ComboBox fx:id="b1ComboBoxT1" />
                          <Label text="B2" />
-                         <ComboBox />
+                         <ComboBox fx:id="b2ComboBoxT1" />
                          <Label text="B3" />
-                         <ComboBox />
+                         <ComboBox fx:id="b3ComboBoxT1" />
                          <Label text="B4" />
-                         <ComboBox />
+                         <ComboBox fx:id="b4ComboBoxT1" />
                          <Label text="B5" />
-                         <ComboBox />
+                         <ComboBox fx:id="b5ComboBoxT1" />
                          <Label text="B6" />
-                         <ComboBox />
+                         <ComboBox fx:id="b6ComboBoxT1" />
                          <Label text="B7" />
-                         <ComboBox />
+                         <ComboBox fx:id="b7ComboBoxT1" />
                          <Label text="B8" />
-                         <ComboBox />
-                         <Label text="B8A"/>
-                         <ComboBox fx:id="b8aComboBoxT1"/>
+                         <ComboBox fx:id="b8ComboBoxT1" />
+                         <Label text="B8A" />
+                         <ComboBox fx:id="b8aComboBoxT1" />
                          <Label text="B9" />
-                         <ComboBox />
+                         <ComboBox fx:id="b9ComboBoxT1" />
                          <Label text="B10" />
-                         <ComboBox />
+                         <ComboBox fx:id="b10ComboBoxT1" />
                          <Label text="B11" />
-                         <ComboBox />
+                         <ComboBox fx:id="b11ComboBoxT1" />
                          <Label text="B12" />
-                         <ComboBox />
+                         <ComboBox fx:id="b12ComboBoxT1" />
                      </children>
                  </VBox>
              </content>
@@ -73,52 +77,58 @@
                   <HBox.margin>
                      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                   </HBox.margin></Label>
-                  <Button fx:id="fileChooseT2" alignment="CENTER" contentDisplay="CENTER" text="Choose files">
+                  <Button fx:id="fileChooseT2" alignment="CENTER" contentDisplay="CENTER" onMouseClicked="#fileChooseT2Click" text="Choose files">
                   <HBox.margin>
                      <Insets top="5.0" />
                   </HBox.margin></Button>
               </children>
           </HBox>
-         <ScrollPane prefHeight="200.0" prefWidth="200.0">
+         <ScrollPane minHeight="200" minWidth="200.0">
            <content>
-               <VBox fx:id="vBoxT2">
+               <VBox fx:id="vBoxT2" spacing="5.0">
                    <children>
                        <Label prefWidth="200" text="B1" />
-                       <ComboBox fx:id="b1ComboBoxT2"/>
+                       <ComboBox fx:id="b1ComboBoxT2" />
                        <Label text="B2" />
-                       <ComboBox />
+                       <ComboBox fx:id="b2ComboBoxT2" />
                        <Label text="B3" />
-                       <ComboBox />
+                       <ComboBox fx:id="b3ComboBoxT2" />
                        <Label text="B4" />
-                       <ComboBox />
+                       <ComboBox fx:id="b4ComboBoxT2" />
                        <Label text="B5" />
-                       <ComboBox />
+                       <ComboBox fx:id="b5ComboBoxT2" />
                        <Label text="B6" />
-                       <ComboBox />
+                       <ComboBox fx:id="b6ComboBoxT2" />
                        <Label text="B7" />
-                       <ComboBox />
+                       <ComboBox fx:id="b7ComboBoxT2" />
                        <Label text="B8" />
-                       <ComboBox />
+                       <ComboBox fx:id="b8ComboBoxT2" />
                        <Label text="B8A" />
                        <ComboBox fx:id="b8aComboBoxT2" />
                        <Label text="B9" />
-                       <ComboBox />
+                       <ComboBox fx:id="b9ComboBoxT2" />
                        <Label text="B10" />
-                       <ComboBox />
+                       <ComboBox fx:id="b10ComboBoxT2" />
                        <Label text="B11" />
-                       <ComboBox />
+                       <ComboBox fx:id="b11ComboBoxT2" />
                        <Label text="B12" />
-                       <ComboBox />
+                       <ComboBox fx:id="b12ComboBoxT2" />
                    </children>
                </VBox>
            </content>
          </ScrollPane>
-      </children></VBox>
+      </children>
+      <GridPane.margin>
+         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+      </GridPane.margin></VBox>
+   <VBox fx:id="controlsVBox" prefWidth="200.0"  GridPane.columnIndex="2" GridPane.rowIndex="1">
+      <children>
+          <Button fx:id="renderRgb"  onMouseClicked="#buttonClickHandler" text="Don't push me" />
+      </children>
+   </VBox>
 
-
-    <Button fx:id="button" onMouseClicked="#buttonClickHandler" prefWidth="400" text="Don't push me" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-
-    <ImageView fx:id="view" fitHeight="60" fitWidth="600" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+    <ImageView fx:id="view" fitHeight="60" fitWidth="600" pickOnBounds="true" preserveRatio="true"
+               GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
 
     <rowConstraints>
