@@ -170,7 +170,7 @@
                         </TextField>
                     </children>
                 </HBox>
-                <Button fx:id="createDatasetButton" minHeight="10.0" mnemonicParsing="false" onAction="#createDatasetClickHandler" text="Create Dataset">
+                <Button fx:id="createDatasetButton" minHeight="10.0" mnemonicParsing="false" onMouseClicked="#createDatasetClickHandler" text="Create Dataset">
                     <VBox.margin>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                     </VBox.margin>

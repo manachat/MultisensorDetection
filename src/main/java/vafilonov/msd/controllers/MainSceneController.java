@@ -305,8 +305,10 @@ public class MainSceneController {
             }
             paths[i++] = box.getValue().getPath();
         }
-
-        Renderer.createDataset(mark, "/home/vfilonov/forest.csv", paths);
+        if (1<2) {
+            throw new RuntimeException("Not implemented");
+        }
+        Renderer.createDataset(mark, "/home/vfilonov/all_2020.csv", paths);// TODO remove
     }
 
 

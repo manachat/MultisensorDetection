@@ -213,6 +213,8 @@ public class Renderer {
     }
 
     private static void writeData(int classMark, String output, Band[] bands) {
+        final String noDataMatcher = classMark + ",0,0,0,0,0,0,0,0,0,0,0,0,0";
+
         // get geotransforms for bands of different resolutions
         double[] transform10 = new double[6];
         double[] transform20 = new double[6];
@@ -306,11 +308,15 @@ public class Renderer {
                     builder.append(classMark);
                     builder.append(',');
                     for (int i = 0; i < BANDS_NUM; i++) {
-                        builder.append(shorts[i].array()[x / PIXEL_RESOLUTIONS[i]]);
+                        builder.append(shorts[i].get(x / PIXEL_RESOLUTIONS[i]));
+                        //builder.append(shorts[i].array()[x / PIXEL_RESOLUTIONS[i]]);
                         if (i != BANDS_NUM - 1)
                             builder.append(',');
                     }
-
+                    String res = builder.toString();
+                    if (!res.equals(noDataMatcher)) {
+                        csv.println(builder.toString());
+                    }
                 }
 
             }
