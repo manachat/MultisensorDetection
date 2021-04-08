@@ -21,6 +21,39 @@ import java.util.Vector;
 
 public class Archive {
 
+    public static void main(String[] args) {
+        gdal.AllRegister();
+        final String path1 = "/home/vfilonov/programming/geodata/test/learnings/forest_20_b1.tif";
+        final String path2 = "/home/vfilonov/programming/geodata/test/learnings/forest_20_b2.tif";
+        final String path5 = "/home/vfilonov/programming/geodata/test/learnings/forest_20_b5.tif";
+        Dataset set1 = gdal.Open(path1);
+        Band band1 = set1.GetRasterBand(1);
+        Dataset set2 = gdal.Open(path2);
+        Band band2 = set2.GetRasterBand(1);
+        Dataset set5 = gdal.Open(path5);
+        Band band5 = set5.GetRasterBand(1);
+
+        double[] trans1 = new double[6];
+        set1.GetGeoTransform(trans1);
+        double[] trans2 = new double[6];
+        set2.GetGeoTransform(trans2);
+        double[] trans5 = new double[6];
+        set5.GetGeoTransform(trans5);
+
+        System.out.println("trans1: " + trans1[0] + "; " + (trans1[1]*band1.GetXSize()));
+        System.out.println("trans2: " + trans2[0] + "; " + (trans2[1]*band2.GetXSize()));
+        System.out.println("trans5: " + trans5[0] + "; " + (trans5[1]*band5.GetXSize()));
+
+        System.out.println("Band1: size - " + band1.GetXSize() + "; natrual size - " + band1.GetBlockXSize());
+        System.out.println("Band2: size - " + band2.GetXSize() + "; natrual size - " + band2.GetBlockXSize());
+        System.out.println("Band5: size - " + band5.GetXSize() + "; natrual size - " + band5.GetBlockXSize());
+
+
+        set1.delete();
+        set2.delete();
+        set5.delete();
+    }
+
     private void readPixels(String path) {
         gdal.AllRegister();
         Dataset data = null;
