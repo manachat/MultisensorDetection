@@ -21,8 +21,8 @@ public class Main extends Application {
     public static void main(String[] args) {
         Properties prop = new Properties();
         final String file = "app.config";
-        try {
-            prop.load(new FileInputStream(file));
+        try (var propStream = new FileInputStream(file)) {
+            prop.load(propStream);
         } catch (IOException ioex) {
             System.err.println("Couldn't load configuration file.");
             System.exit(-1);
@@ -44,7 +44,8 @@ public class Main extends Application {
         loader.setLocation(getClass().getResource("/fxml/MainScene.fxml"));
         Parent root = loader.load();
 
-        Scene scene = new Scene(root, screenSize.getWidth(), screenSize.getHeight());
+
+        Scene scene = new Scene(root, screenSize.getWidth() * 3 / 4, screenSize.getHeight() * 3 / 4);
         Main.scene = scene;
         stage.setScene(scene);
 

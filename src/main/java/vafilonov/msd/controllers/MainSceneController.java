@@ -2,7 +2,15 @@ package vafilonov.msd.controllers;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.geometry.Rectangle2D;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.image.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
@@ -11,12 +19,16 @@ import vafilonov.msd.Main;
 import vafilonov.msd.utils.Renderer;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 
 public class MainSceneController {
 
     private static final int MENU_BAR_PREF_HEIGHT = 25;
+
+    private Path outputDatasetFilePath = null;
 
     @FXML
     private VBox toolsVBox;
@@ -26,6 +38,9 @@ public class MainSceneController {
 
     @FXML
     private TextField classMarkTextField;
+
+    @FXML
+    private Button outputDatasetButton;
 
     @FXML
     private Button createDatasetButton;
@@ -151,25 +166,40 @@ public class MainSceneController {
             view.setFitWidth(Main.scene.getWidth() - filesVBox.getPrefWidth() - toolsVBox.getPrefWidth());
         });
 
-        filesVBox.prefHeightProperty().bind(Main.scene.heightProperty());
-        toolsVBox.prefHeightProperty().bind(Main.scene.heightProperty());
+        //filesVBox.prefHeightProperty().bind(Main.scene.heightProperty());
+        //toolsVBox.prefHeightProperty().bind(Main.scene.heightProperty());
 
         Main.scene.heightProperty().addListener(value -> {
             view.setFitHeight(Main.scene.getHeight() - MENU_BAR_PREF_HEIGHT);
+            filesVBox.setPrefHeight(Main.scene.getHeight() - MENU_BAR_PREF_HEIGHT-10);
+            toolsVBox.setPrefHeight(Main.scene.getHeight() - MENU_BAR_PREF_HEIGHT-10);
         });
     }
 
 
     /**
-     * Sets presentation options for combo boxes
+     * Sets presentation options for comboboxes.
      */
-    @SuppressWarnings("unchecked")
     private void initializeComboBoxes() {
 
-        for (var child : vBoxT1.getChildren()) {
+        initBoxes(vBoxT1, t1Boxes);
+
+        initBoxes(vBoxT2, t2Boxes);
+    }
+
+    /**
+     * Initializes boxes' presentation mechanisms.
+     * Adds boxes to specified collection.
+     * Helper method for code deduplication.
+     * @param vBox vBox with comboboxes
+     * @param collection collection for boxes
+     */
+    @SuppressWarnings("unchecked")
+    private void initBoxes(VBox vBox, ArrayList<ComboBox<File>> collection) {
+        for (var child : vBox.getChildren()) {
             if (child instanceof ComboBox) {
                 ComboBox<File> b = (ComboBox<File>) child;
-                t1Boxes.add(b);
+                collection.add(b);
                 b.setButtonCell(new ListCell<>() {
                     @Override
                     protected void updateItem(File item, boolean empty) {
@@ -185,58 +215,26 @@ public class MainSceneController {
                 });
             }
         }
-
-        for (var child : vBoxT2.getChildren()) {
-            if (child instanceof ComboBox) {
-                ComboBox<File> b = (ComboBox<File>) child;
-                t2Boxes.add(b);
-                b.setButtonCell(new ListCell<>() {
-                    @Override
-                    protected void updateItem(File item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (empty) {
-                            setText(null);
-                        } else if (item == null) {
-                            setText("--");
-                        }else {
-                            setText(item.getName());
-                        }
-                    }
-                });
-            }
-        }
     }
+
 
 
 
     @FXML
     private void fileChooseT1Click(MouseEvent e) {
-        final FileChooser chooser = new FileChooser();
-        chooser.setTitle("Choose files");
-
-
-        var files = chooser.showOpenMultipleDialog(Main.stage);
-
-        if (files == null) {
-            return;
-        }
-
-        for (int i = 0; i < t1Boxes.size(); i++) {
-            ComboBox<File> cb = t1Boxes.get(i);
-            cb.getItems().clear();
-            cb.getItems().addAll(files);
-            cb.getItems().add(null);
-            if (i < files.size()) {
-                cb.setValue(files.get(i));
-            }
-        }
+        chooseFilesForBoxes(t1Boxes);
     }
 
     @FXML
     private void fileChooseT2Click(MouseEvent e) {
+        chooseFilesForBoxes(t2Boxes);
+    }
+
+    private void chooseFilesForBoxes(ArrayList<ComboBox<File>> boxes) {
         final FileChooser chooser = new FileChooser();
         chooser.setTitle("Choose files");
-
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Satellite-2 data (*.tif, *.jp2)", "*.jp2", "*.tif"));
+        //chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Satellite-2 data: ", "*.jp2", "*.tif"));
 
         var files = chooser.showOpenMultipleDialog(Main.stage);
 
@@ -244,9 +242,8 @@ public class MainSceneController {
             return;
         }
 
-        for (int i = 0; i < t2Boxes.size(); i++) {
-            ComboBox<File> cb = t2Boxes.get(i);
-
+        for (int i = 0; i < boxes.size(); i++) {
+            ComboBox<File> cb = boxes.get(i);
             cb.getItems().clear();
             cb.getItems().addAll(files);
             cb.getItems().add(null);
@@ -259,56 +256,83 @@ public class MainSceneController {
 
     @FXML
     private void renderRGBClickHandler(MouseEvent e) throws Exception {
-        String blue = b2ComboBoxT1.getValue().getPath();
-        String green = b3ComboBoxT1.getValue().getPath();
-        String red = b4ComboBoxT1.getValue().getPath();
+        if (t1Boxes.get(bands.B2.ordinal()).getValue() == null ||
+                t1Boxes.get(bands.B3.ordinal()).getValue() == null ||
+                t1Boxes.get(bands.B4.ordinal()).getValue() == null) {
+            showAlertMessage("Error", "RGB bands (2,3,4) not set.");
+            return;
+        }
 
-        int[] pixels = Renderer.renderRGB(red, green, blue);
+        String blue = t1Boxes.get(bands.B2.ordinal()).getValue().getPath();
+        String green = t1Boxes.get(bands.B3.ordinal()).getValue().getPath();
+        String red = t1Boxes.get(bands.B4.ordinal()).getValue().getPath();
+
+        final int[] pixels = Renderer.renderRGB(red, green, blue);
         if (pixels == null)
             return;
-
+        // width and height
         int x = pixels[0];
         int y = pixels[1];
-
-
+        git
         WritableImage img = new WritableImage(x, y);
         PixelWriter writer = img.getPixelWriter();
-
         writer.setPixels(0, 0, x, y, PixelFormat.getIntArgbInstance(), pixels, 2, x);
         view.setImage(img);
 
-        pixels = null;
-        renderRgbButton.setText("finished");
         Runtime.getRuntime().gc();
 
     }
 
     @FXML
+    private void chooseDatasetFileClickHandler(MouseEvent e) {
+        final FileChooser chooser = new FileChooser();
+        chooser.setTitle("Choose output file");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Dataset file(.csv)", "*.csv"));
+        var res = chooser.showSaveDialog(Main.stage);
+        Path path = Paths.get(res.getAbsolutePath() + ".csv");
+        String simpleName = path.getFileName().toString();
+        outputDatasetFilePath = path;
+        outputDatasetButton.setText(simpleName);
+    }
+
+    private void canvaser() {
+        Canvas canvas = new Canvas();
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+
+
+    }
+
+    @FXML
     private void createDatasetClickHandler(MouseEvent e) {
+        if (outputDatasetFilePath == null) {
+            showAlertMessage("Error", "Output file not set.");
+            return;
+        }
+
         int mark = -1;
         if (classMarkTextField.getText() == null || classMarkTextField.getText().isBlank()) {
             showAlertMessage("Error", "Class mark not set.");
             return;
         }
+
         try {
             mark = Integer.parseInt(classMarkTextField.getText());
         } catch (NumberFormatException numEx) {
             showAlertMessage("Error", "Invalid integer format");
             return;
         }
+
         String[] paths = new String[t1Boxes.size()];
         int i = 0;
         for (var box : t1Boxes) {
-            if (box == null) {
+            if (box == null || box.getValue() == null) {
                 showAlertMessage("Error", "Not all bands present.");
                 return;
             }
             paths[i++] = box.getValue().getPath();
         }
-        if (1<2) {
-            throw new RuntimeException("Not implemented");
-        }
-        Renderer.createDataset(mark, "/home/vfilonov/all_2020.csv", paths);// TODO remove
+
+        Renderer.createDataset(mark, outputDatasetFilePath.toString(), paths);// TODO remove
     }
 
 
@@ -349,6 +373,22 @@ public class MainSceneController {
         msg.setHeaderText(null);
         msg.setGraphic(null);
         msg.show();
+    }
+
+    private enum bands {
+        B1,
+        B2,
+        B3,
+        B4,
+        B5,
+        B6,
+        B7,
+        B8,
+        B8A,
+        B9,
+        B10,
+        B11,
+        B12
     }
 
 }

@@ -57,7 +57,7 @@ public class Archive {
     private void readPixels(String path) {
         gdal.AllRegister();
         Dataset data = null;
-        Band band = null;
+        Band band;
         int x,y;
 
 
@@ -270,6 +270,7 @@ public class Archive {
     }
 
 
+    @SuppressWarnings("unchecked")
     private void clipRasterByCoords() {
         // -projwin 37.140077458 55.991533828 37.814126275 55.73792501 -of GTiff
         TranslateOptions options = null;

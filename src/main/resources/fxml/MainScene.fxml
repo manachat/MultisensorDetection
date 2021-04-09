@@ -5,7 +5,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane prefHeight="425.0" prefWidth="800.0" style="-fx-border-color: orange; -fx-border-width: 5;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vafilonov.msd.controllers.MainSceneController">
+<BorderPane prefHeight="425.0" prefWidth="800.0" style="-fx-background-color: blue;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vafilonov.msd.controllers.MainSceneController">
     <top>
 
         <MenuBar prefHeight="25.0" style="-fx-background-color: orange;" BorderPane.alignment="CENTER">
@@ -28,7 +28,7 @@
     </top>
     <left>
 
-        <VBox fx:id="filesVBox" prefHeight="400.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+        <VBox fx:id="filesVBox" minHeight="500.0" minWidth="220.0" prefWidth="220.0" style="-fx-background-color: white; -fx-border-color: orange; -fx-border-width: 2;" BorderPane.alignment="CENTER">
             <children>
                 <HBox>
                     <children>
@@ -131,11 +131,14 @@
                     </content>
                 </ScrollPane>
             </children>
+         <BorderPane.margin>
+            <Insets />
+         </BorderPane.margin>
         </VBox>
     </left>
     <right>
 
-        <VBox fx:id="toolsVBox" minWidth="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+        <VBox fx:id="toolsVBox" minHeight="500.0" minWidth="200.0" prefWidth="200.0" style="-fx-background-color: white; -fx-border-color: orange; -fx-border-width: 2;" BorderPane.alignment="CENTER">
             <children>
                 <BorderPane prefHeight="10.0" prefWidth="200.0">
                     <center>
@@ -146,6 +149,7 @@
                         </Label>
                     </center>
                 </BorderPane>
+            <Separator prefWidth="200.0" />
                 <Button fx:id="renderRgbButton" alignment="CENTER" contentDisplay="CENTER" minHeight="10.0" onMouseClicked="#renderRGBClickHandler" text="Render RGB" textAlignment="CENTER">
                     <VBox.margin>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
@@ -156,6 +160,11 @@
                         <Insets bottom="5.0" top="5.0" />
                     </VBox.margin>
                 </Separator>
+            <Button fx:id="outputDatasetButton" mnemonicParsing="false" onMouseClicked="#chooseDatasetFileClickHandler" text="Choose output file">
+               <VBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </VBox.margin>
+            </Button>
                 <HBox prefHeight="10.0" prefWidth="200.0">
                     <children>
                         <Label minHeight="10.0" minWidth="80.0" text="Class mark:">
@@ -187,4 +196,7 @@
 
         <ImageView fx:id="view" fitHeight="60" fitWidth="600" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER" />
     </center>
+   <opaqueInsets>
+      <Insets />
+   </opaqueInsets>
 </BorderPane>

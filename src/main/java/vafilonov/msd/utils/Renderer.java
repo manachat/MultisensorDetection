@@ -1,5 +1,6 @@
 package vafilonov.msd.utils;
 
+import javafx.scene.image.WritableImage;
 import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
@@ -12,6 +13,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 import java.nio.charset.StandardCharsets;
+
 import static vafilonov.msd.utils.Constants.BANDS_NUM;
 import static vafilonov.msd.utils.Constants.PIXEL_RESOLUTIONS;
 import static vafilonov.msd.utils.Constants.BAND_NAMES;
@@ -39,7 +41,6 @@ public class Renderer {
         Band blue = null;
         int x,y;
 
-
         int[] raw = null;
 
         try {
@@ -65,7 +66,7 @@ public class Renderer {
                 throw new IllegalArgumentException("Render Error: Coordinates not aligned.");
             }
 
-            raw = fillrender(red, green, blue);
+            raw = fillRender(red, green, blue);
 
         } catch (Exception ex) {
             System.out.println("Falure opening file, retard");
@@ -91,7 +92,7 @@ public class Renderer {
      * @param blue синий канал
      * @return массив размера 2 + x*y
      */
-    private static int[] fillrender(Band red, Band green, Band blue ) {
+    private static int[] fillRender(Band red, Band green, Band blue ) {
         double[] redStats = new double[2];
         double[] greenStats = new double[2];
         double[] blueStats = new double[2];
@@ -280,12 +281,14 @@ public class Renderer {
                 // refill buffers
                 for (int i = 0; i < BANDS_NUM; i++) {
                     if (PIXEL_RESOLUTIONS[i] == 10) {
+                        rows[i].clear();
                         bands[i].ReadRaster_Direct(xOffset10 / PIXEL_RESOLUTIONS[i], (yOffset10 + y) / PIXEL_RESOLUTIONS[i],
                                 width / PIXEL_RESOLUTIONS[i], 1, width / PIXEL_RESOLUTIONS[i], 1,
                                 gdalconst.GDT_Int16, rows[i]);
 
                     } else if (PIXEL_RESOLUTIONS[i] == 20) {
                         if ((yOffset20 + y) % PIXEL_RESOLUTIONS[i] == 0 || y == 0) {
+                            rows[i].clear();
                             bands[i].ReadRaster_Direct(xOffset20 / PIXEL_RESOLUTIONS[i], (yOffset20 + y) / PIXEL_RESOLUTIONS[i],
                                     width / PIXEL_RESOLUTIONS[i], 1, width / PIXEL_RESOLUTIONS[i], 1,
                                     gdalconst.GDT_Int16, rows[i]);
@@ -293,6 +296,7 @@ public class Renderer {
 
                     } else {
                         if ((yOffset60 + y) % PIXEL_RESOLUTIONS[i] == 0 || y == 0) {
+                            rows[i].clear();
                             bands[i].ReadRaster_Direct(xOffset60 / PIXEL_RESOLUTIONS[i], (yOffset60 + y) / PIXEL_RESOLUTIONS[i],
                                     width / PIXEL_RESOLUTIONS[i], 1, width / PIXEL_RESOLUTIONS[i], 1,
                                     gdalconst.GDT_Int16, rows[i]);
@@ -304,18 +308,22 @@ public class Renderer {
 
                 // write features for each pixel
                 for (int x = 0; x < width; x += 10) {
+
                     builder = new StringBuilder();
                     builder.append(classMark);
                     builder.append(',');
+
+
                     for (int i = 0; i < BANDS_NUM; i++) {
                         builder.append(shorts[i].get(x / PIXEL_RESOLUTIONS[i]));
-                        //builder.append(shorts[i].array()[x / PIXEL_RESOLUTIONS[i]]);
+
                         if (i != BANDS_NUM - 1)
                             builder.append(',');
                     }
+
                     String res = builder.toString();
-                    if (!res.equals(noDataMatcher)) {
-                        csv.println(builder.toString());
+                    if (!res.equals(noDataMatcher)) {   //  checks nodata
+                        csv.println(res);
                     }
                 }
 

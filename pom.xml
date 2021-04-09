@@ -8,8 +8,6 @@
     <artifactId>MultisensorDetection</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-
-
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
@@ -22,7 +20,7 @@
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
-                <version>0.0.3</version>
+                <version>0.0.5</version>
                 <configuration>
                     <mainClass>vafilonov.msd.Main</mainClass>
                 </configuration>
@@ -35,12 +33,12 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>11.0.2</version>
+            <version>15.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
-            <version>11.0.2</version>
+            <version>15.0.1</version>
         </dependency>
 
         <!-- GDAL -->
