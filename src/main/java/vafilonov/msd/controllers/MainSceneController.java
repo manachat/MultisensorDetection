@@ -273,7 +273,7 @@ public class MainSceneController {
         // width and height
         int x = pixels[0];
         int y = pixels[1];
-        git
+
         WritableImage img = new WritableImage(x, y);
         PixelWriter writer = img.getPixelWriter();
         writer.setPixels(0, 0, x, y, PixelFormat.getIntArgbInstance(), pixels, 2, x);
