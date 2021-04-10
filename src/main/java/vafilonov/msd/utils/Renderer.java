@@ -31,7 +31,7 @@ public class Renderer {
      * @return array of pixel values of size 2 + x*y, where arr[0] - X size of raster, arr[1] - Y size of raster
      * @throws IllegalArgumentException - in case bands are not aligned by coordinates
      */
-    public static int[] renderRGB(final String redPath, final String greenPath, final String bluePath) {
+    public static int[] renderRGBLike(final String redPath, final String greenPath, final String bluePath) {
         gdal.AllRegister();
         Dataset redData = null;
         Dataset greenData = null;
@@ -81,6 +81,10 @@ public class Renderer {
                 blueData.delete();
         }
         return raw;
+    }
+
+    public static int[] renderIndex(final String extracted, final String exctractor) {
+        throw new RuntimeException("renderIndex not implemented");
     }
 
     /**
