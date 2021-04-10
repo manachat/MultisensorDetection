@@ -1,6 +1,5 @@
 package vafilonov.msd.utils;
 
-import javafx.scene.image.WritableImage;
 import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
@@ -60,6 +59,11 @@ public class Renderer {
             greenData.GetGeoTransform(transformGreen);
             blueData.GetGeoTransform(transformBlue);
 
+            int redResolution = (int) transformRed[1];
+            int greenResolution = (int) transformGreen[1];
+            int blueResolution = (int) transformBlue[1];
+
+
             if (transformRed[0] != transformBlue[0] || transformRed[0] != transformGreen[0] ||
                     red.getXSize() != green.getXSize() || red.GetXSize() != blue.GetXSize() ||
                     red.GetYSize() != blue.GetYSize() || red.GetYSize() != green.GetYSize()) {
@@ -96,7 +100,7 @@ public class Renderer {
      * @param blue синий канал
      * @return массив размера 2 + x*y
      */
-    private static int[] fillRender(Band red, Band green, Band blue ) {
+    private static int[] fillRender(Band red, Band green, Band blue) {
         double[] redStats = new double[2];
         double[] greenStats = new double[2];
         double[] blueStats = new double[2];
@@ -220,53 +224,15 @@ public class Renderer {
     private static void writeData(int classMark, String output, Band[] bands) {
         final String noDataMatcher = classMark + ",0,0,0,0,0,0,0,0,0,0,0,0,0";
 
-        // get geotransforms for bands of different resolutions
-        double[] transform10 = new double[6];
-        double[] transform20 = new double[6];
-        double[] transform60 = new double[6];
-        bands[1].GetDataset().GetGeoTransform(transform10);
-        bands[4].GetDataset().GetGeoTransform(transform20);
-        bands[0].GetDataset().GetGeoTransform(transform60);
-
-        // get absolute coordinates of upper-left corner
-        int x10 = (int) transform10[0];
-        int y10 = (int) transform10[3];
-        int x20 = (int) transform20[0];
-        int y20 = (int) transform20[3];
-        int x60 = (int) transform60[0];
-        int y60 = (int) transform60[3];
-
-        // get offsets of 20m and 60m resolutions
-        int xOffset20 = x20 - x10;
-        int yOffset20 = y20 - y10;
-        int xOffset60 = x60 - x10;
-        int yOffset60 = y60 - y10;
-
-        // calculate offset for 10m resolution
-        int xOffset10 = Math.max(xOffset20, xOffset60);
-        xOffset10 = Math.max(0, xOffset10);
-        int yOffset10 = Math.max(yOffset20, yOffset60);
-        yOffset10 = Math.max(0, yOffset10);
-
-        // width of intersection in meters
-        int width = x10 + PIXEL_RESOLUTIONS[1]*bands[1].getXSize();
-        width = Math.min(width, x20 + PIXEL_RESOLUTIONS[4]*bands[4].getXSize());
-        width = Math.min(width, x60 + PIXEL_RESOLUTIONS[0]*bands[0].getXSize());
-        width -= x10;
-        width -= xOffset10;
-
-        // height of intersection in meters
-        int height = y10 + PIXEL_RESOLUTIONS[1]*bands[1].getYSize();
-        height = Math.min(height, y20 + PIXEL_RESOLUTIONS[4]*bands[4].getYSize());
-        height = Math.min(height, y60 + PIXEL_RESOLUTIONS[0]*bands[0].getYSize());
-        height -= y10;
-        height -= yOffset10;
-
-        // rewrite offsets relatively to 10m
-        xOffset20 = xOffset10 - xOffset20;
-        yOffset20 = yOffset10 - yOffset20;
-        xOffset60 = xOffset10 - xOffset60;
-        yOffset60 = yOffset10 - yOffset60;
+        int[] d = calculateOffsets(bands[1], bands[4], bands[0]);
+        int width = d[0];
+        int height = d[1];
+        int xOffset10 = d[2];
+        int yOffset10 = d[3];
+        int xOffset20 = d[4];
+        int yOffset20 = d[5];
+        int xOffset60 = d[6];
+        int yOffset60 = d[7];
 
         // buffers for rows of data
         ByteBuffer[] rows = new ByteBuffer[BANDS_NUM];
@@ -337,5 +303,65 @@ public class Renderer {
             throw new IllegalArgumentException("Error opening csv file.");
 
         }
+    }
+
+    /**
+     *
+     * @param band10
+     * @param band20
+     * @param band60
+     * @return
+     */
+    private static int[] calculateOffsets(Band band10, Band band20, Band band60) {
+        // get geotransforms for bands of different resolutions
+        double[] transform10 = new double[6];
+        double[] transform20 = new double[6];
+        double[] transform60 = new double[6];
+        band10.GetDataset().GetGeoTransform(transform10);
+        band20.GetDataset().GetGeoTransform(transform20);
+        band60.GetDataset().GetGeoTransform(transform60);
+
+        int x10,y10,x20,y20,x60,y60;
+        // get absolute coordinates of upper-left corner
+        x10 = (int) transform10[0];
+        y10 = (int) transform10[3];
+        x20 = (int) transform20[0];
+        y20 = (int) transform20[3];
+        x60 = (int) transform60[0];
+        y60 = (int) transform60[3];
+
+        // get offsets of 20m and 60m resolutions
+        int xOffset20 = x20 - x10;
+        int yOffset20 = y20 - y10;
+        int xOffset60 = x60 - x10;
+        int yOffset60 = y60 - y10;
+
+        // calculate offset for 10m resolution
+        int xOffset10 = Math.max(xOffset20, xOffset60);
+        xOffset10 = Math.max(0, xOffset10);
+        int yOffset10 = Math.max(yOffset20, yOffset60);
+        yOffset10 = Math.max(0, yOffset10);
+
+        // width of intersection in meters
+        int width = x10 + PIXEL_RESOLUTIONS[1]*band10.getXSize();
+        width = Math.min(width, x20 + PIXEL_RESOLUTIONS[4]*band20.getXSize());
+        width = Math.min(width, x60 + PIXEL_RESOLUTIONS[0]*band60.getXSize());
+        width -= x10;
+        width -= xOffset10;
+
+        // height of intersection in meters
+        int height = y10 + PIXEL_RESOLUTIONS[1]*band10.getYSize();
+        height = Math.min(height, y20 + PIXEL_RESOLUTIONS[4]*band20.getYSize());
+        height = Math.min(height, y60 + PIXEL_RESOLUTIONS[0]*band60.getYSize());
+        height -= y10;
+        height -= yOffset10;
+
+        // rewrite offsets relatively to 10m
+        xOffset20 = xOffset10 - xOffset20;
+        yOffset20 = yOffset10 - yOffset20;
+        xOffset60 = xOffset10 - xOffset60;
+        yOffset60 = yOffset10 - yOffset60;
+
+        return new int[] {width, height, xOffset10, yOffset10, xOffset20, yOffset20, xOffset60, yOffset60};
     }
 }
