@@ -14,8 +14,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import vafilonov.msd.Main;
-import vafilonov.msd.utils.Constants;
-import vafilonov.msd.utils.Renderer;
+import vafilonov.msd.core.sentinel2.utils.Sentinel2Band;
+import vafilonov.msd.core.Renderer;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -255,16 +255,16 @@ public class MainSceneController {
 
     @FXML
     private void renderRGBClickHandler(MouseEvent e) throws Exception {
-        if (t1Boxes.get(Constants.Bands.B2.ordinal()).getValue() == null ||
-                t1Boxes.get(Constants.Bands.B3.ordinal()).getValue() == null ||
-                t1Boxes.get(Constants.Bands.B4.ordinal()).getValue() == null) {
+        if (t1Boxes.get(Sentinel2Band.B2.ordinal()).getValue() == null ||
+                t1Boxes.get(Sentinel2Band.B3.ordinal()).getValue() == null ||
+                t1Boxes.get(Sentinel2Band.B4.ordinal()).getValue() == null) {
             showAlertMessage("Error", "RGB bands (2,3,4) not set.");
             return;
         }
 
-        String blue = t1Boxes.get(Constants.Bands.B2.ordinal()).getValue().getPath();
-        String green = t1Boxes.get(Constants.Bands.B3.ordinal()).getValue().getPath();
-        String red = t1Boxes.get(Constants.Bands.B4.ordinal()).getValue().getPath();
+        String blue = t1Boxes.get(Sentinel2Band.B2.ordinal()).getValue().getPath();
+        String green = t1Boxes.get(Sentinel2Band.B3.ordinal()).getValue().getPath();
+        String red = t1Boxes.get(Sentinel2Band.B4.ordinal()).getValue().getPath();
 
         final int[] pixels = Renderer.renderRGBLike(red, green, blue);
         if (pixels == null)
@@ -285,16 +285,16 @@ public class MainSceneController {
 
     @FXML
     private void renderInfraredClickHandler(MouseEvent e) {
-        if (t1Boxes.get(Constants.Bands.B8.ordinal()).getValue() == null ||
-                t1Boxes.get(Constants.Bands.B3.ordinal()).getValue() == null ||
-                t1Boxes.get(Constants.Bands.B4.ordinal()).getValue() == null) {
+        if (t1Boxes.get(Sentinel2Band.B8.ordinal()).getValue() == null ||
+                t1Boxes.get(Sentinel2Band.B3.ordinal()).getValue() == null ||
+                t1Boxes.get(Sentinel2Band.B4.ordinal()).getValue() == null) {
             showAlertMessage("Error", "RGB bands (2,3,4) not set.");
             return;
         }
 
-        String blue = t1Boxes.get(Constants.Bands.B3.ordinal()).getValue().getPath();
-        String green = t1Boxes.get(Constants.Bands.B4.ordinal()).getValue().getPath();
-        String red = t1Boxes.get(Constants.Bands.B8.ordinal()).getValue().getPath();
+        String blue = t1Boxes.get(Sentinel2Band.B3.ordinal()).getValue().getPath();
+        String green = t1Boxes.get(Sentinel2Band.B4.ordinal()).getValue().getPath();
+        String red = t1Boxes.get(Sentinel2Band.B8.ordinal()).getValue().getPath();
 
         final int[] pixels = Renderer.renderRGBLike(red, green, blue);
         if (pixels == null)

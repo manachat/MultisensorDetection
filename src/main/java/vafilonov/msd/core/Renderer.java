@@ -1,4 +1,4 @@
-package vafilonov.msd.utils;
+package vafilonov.msd.core;
 
 import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
@@ -6,6 +6,7 @@ import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
 import org.gdal.gdalconst.gdalconstConstants;
 import vafilonov.msd.Main;
+import vafilonov.msd.core.sentinel2.utils.Sentinel2Band;
 import weka.classifiers.trees.RandomForest;
 import weka.core.*;
 
@@ -18,10 +19,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static vafilonov.msd.utils.Constants.BANDS_NUM;
-import static vafilonov.msd.utils.Constants.PIXEL_RESOLUTIONS;
-import static vafilonov.msd.utils.Constants.BAND_NAMES;
+import static vafilonov.msd.core.sentinel2.utils.Constants.BANDS_NUM;
+import static vafilonov.msd.core.sentinel2.utils.Constants.PIXEL_RESOLUTIONS;
+import static vafilonov.msd.core.sentinel2.utils.Constants.BAND_NAMES;
 
+@Deprecated
 public class Renderer {
 
 
@@ -359,19 +361,19 @@ public class Renderer {
     private static int[] makeClassification(Band[] t1, Band[] t2) throws Exception {
         ArrayList<Attribute> attributes = new ArrayList<>();
         attributes.add(new Attribute("Mark"));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B1.ordinal()]));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B2.ordinal()]));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B3.ordinal()]));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B4.ordinal()]));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B5.ordinal()]));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B6.ordinal()]));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B7.ordinal()]));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B8.ordinal()]));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B8A.ordinal()]));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B9.ordinal()]));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B10.ordinal()]));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B11.ordinal()]));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B12.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B1.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B2.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B3.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B4.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B5.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B6.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B7.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B8.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B8A.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B9.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B10.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B11.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B12.ordinal()]));
         Instances dataset = new Instances("pixels", attributes, 0);
         dataset.setClassIndex(0);
 
@@ -484,9 +486,9 @@ public class Renderer {
                 int class2 = (int) forest.classifyInstance(t2Instance);
 
                 int delta = Math.abs(class1 - class2);
-                int r = (int) ((shorts1[Constants.Bands.B4.ordinal()].get(x / rgb_resolution) - redMin) * 255 / (redMax - redMin));
-                int g = (int) ((shorts1[Constants.Bands.B3.ordinal()].get(x / rgb_resolution) - greenMin) * 255 / (greenMax - greenMin));
-                int b = (int) ((shorts1[Constants.Bands.B2.ordinal()].get(x / rgb_resolution) - blueMin) * 255 / (blueMax - blueMin));
+                int r = (int) ((shorts1[Sentinel2Band.B4.ordinal()].get(x / rgb_resolution) - redMin) * 255 / (redMax - redMin));
+                int g = (int) ((shorts1[Sentinel2Band.B3.ordinal()].get(x / rgb_resolution) - greenMin) * 255 / (greenMax - greenMin));
+                int b = (int) ((shorts1[Sentinel2Band.B2.ordinal()].get(x / rgb_resolution) - blueMin) * 255 / (blueMax - blueMin));
 
                 r = Math.max(0, r);
                 r = Math.min(255, r);

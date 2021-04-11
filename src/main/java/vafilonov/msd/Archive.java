@@ -9,8 +9,7 @@ import org.gdal.gdal.TranslateOptions;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
 import org.gdal.gdalconst.gdalconstConstants;
-import vafilonov.msd.utils.Constants;
-import vafilonov.msd.utils.Renderer;
+import vafilonov.msd.core.sentinel2.utils.Sentinel2Band;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.Instances;
@@ -22,27 +21,28 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Vector;
 
-import static vafilonov.msd.utils.Constants.BAND_NAMES;
+import static vafilonov.msd.core.sentinel2.utils.Constants.BAND_NAMES;
 
+@Deprecated
 public class Archive {
 
     public static void main(String[] args) throws Exception {
         Classifier clf = (Classifier) SerializationHelper.read("/models/random_forest_comb.model");
         ArrayList<Attribute> attributes = new ArrayList<>();
         attributes.add(new Attribute("Mark"));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B1.ordinal()]));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B2.ordinal()]));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B3.ordinal()]));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B4.ordinal()]));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B5.ordinal()]));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B6.ordinal()]));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B7.ordinal()]));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B8.ordinal()]));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B8A.ordinal()]));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B9.ordinal()]));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B10.ordinal()]));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B11.ordinal()]));
-        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B12.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B1.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B2.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B3.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B4.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B5.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B6.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B7.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B8.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B8A.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B9.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B10.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B11.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B12.ordinal()]));
         Instances dataset = new Instances("pixels", attributes, 0);
         dataset.setClassIndex(0);
 
