@@ -155,6 +155,11 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                     </VBox.margin>
                 </Button>
+            <Button mnemonicParsing="false" onMouseClicked="#renderInfraredClickHandler" text="Render Infrared">
+               <VBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </VBox.margin>
+            </Button>
                 <Separator prefWidth="200.0">
                     <VBox.margin>
                         <Insets bottom="5.0" top="5.0" />
@@ -189,6 +194,7 @@
                         <Insets bottom="5.0" top="5.0" />
                     </VBox.margin>
                 </Separator>
+            <Button mnemonicParsing="false" text="Button" onMouseClicked="#classify"/>
             </children>
         </VBox>
     </right>

@@ -1,57 +1,51 @@
 package vafilonov.msd;
 
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
-import javafx.util.Callback;
 import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.TranslateOptions;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
 import org.gdal.gdalconst.gdalconstConstants;
+import vafilonov.msd.utils.Constants;
+import vafilonov.msd.utils.Renderer;
+import weka.classifiers.Classifier;
+import weka.core.Attribute;
+import weka.core.Instances;
+import weka.core.SerializationHelper;
 
-import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.Vector;
+
+import static vafilonov.msd.utils.Constants.BAND_NAMES;
 
 public class Archive {
 
-    public static void main(String[] args) {
-        gdal.AllRegister();
-        final String path1 = "/home/vfilonov/programming/geodata/test/learnings/forest_20_b1.tif";
-        final String path2 = "/home/vfilonov/programming/geodata/test/learnings/forest_20_b2.tif";
-        final String path5 = "/home/vfilonov/programming/geodata/test/learnings/forest_20_b5.tif";
-        Dataset set1 = gdal.Open(path1);
-        Band band1 = set1.GetRasterBand(1);
-        Dataset set2 = gdal.Open(path2);
-        Band band2 = set2.GetRasterBand(1);
-        Dataset set5 = gdal.Open(path5);
-        Band band5 = set5.GetRasterBand(1);
+    public static void main(String[] args) throws Exception {
+        Classifier clf = (Classifier) SerializationHelper.read("/models/random_forest_comb.model");
+        ArrayList<Attribute> attributes = new ArrayList<>();
+        attributes.add(new Attribute("Mark"));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B1.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B2.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B3.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B4.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B5.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B6.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B7.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B8.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B8A.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B9.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B10.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B11.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B12.ordinal()]));
+        Instances dataset = new Instances("pixels", attributes, 0);
+        dataset.setClassIndex(0);
 
-        double[] trans1 = new double[6];
-        set1.GetGeoTransform(trans1);
-        double[] trans2 = new double[6];
-        set2.GetGeoTransform(trans2);
-        double[] trans5 = new double[6];
-        set5.GetGeoTransform(trans5);
-
-        System.out.println("trans1: " + trans1[0] + "; " + (trans1[1]*band1.GetXSize()));
-        System.out.println("trans2: " + trans2[0] + "; " + (trans2[1]*band2.GetXSize()));
-        System.out.println("trans5: " + trans5[0] + "; " + (trans5[1]*band5.GetXSize()));
-
-        System.out.println("Band1: size - " + band1.GetXSize() + "; natrual size - " + band1.GetBlockXSize());
-        System.out.println("Band2: size - " + band2.GetXSize() + "; natrual size - " + band2.GetBlockXSize());
-        System.out.println("Band5: size - " + band5.GetXSize() + "; natrual size - " + band5.GetBlockXSize());
-
-
-        set1.delete();
-        set2.delete();
-        set5.delete();
     }
 
     private void readPixels(String path) {
