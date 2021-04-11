@@ -9,6 +9,8 @@ import weka.core.Instances;
 import weka.core.SerializationHelper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static vafilonov.msd.core.sentinel2.utils.Constants.*;
 
@@ -23,7 +25,7 @@ public class Sentinel2PixelClassifier implements PixelClassifier {
         classifier = cl;
 
         ArrayList<Attribute> attributes = new ArrayList<>();
-        attributes.add(new Attribute("Mark"));
+        attributes.add(new Attribute("Mark", Arrays.asList("0","1","2","3","4","5")));
         attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B1.ordinal()]));
         attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B2.ordinal()]));
         attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B3.ordinal()]));
@@ -59,6 +61,8 @@ public class Sentinel2PixelClassifier implements PixelClassifier {
         double res;
         try {
             res = classifier.classifyInstance(instance);
+            instance.setClassValue(res);
+            res = instance.classIndex();
         } catch (Exception ex) {
             res = -1;
         }

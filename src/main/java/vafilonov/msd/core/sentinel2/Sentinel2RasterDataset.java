@@ -8,27 +8,37 @@ import vafilonov.msd.core.RasterDataset;
 
 import vafilonov.msd.core.sentinel2.utils.Constants;
 
+import static vafilonov.msd.core.sentinel2.utils.Constants.BANDS_NUM;
+import static vafilonov.msd.core.sentinel2.utils.Constants.getResolution;
+import static vafilonov.msd.core.sentinel2.utils.Resolution.res10M;
+import static vafilonov.msd.core.sentinel2.utils.Resolution.res20M;
+import static vafilonov.msd.core.sentinel2.utils.Resolution.res60m;
+
 public class Sentinel2RasterDataset implements RasterDataset {
 
     private Band[] bands;
+    private double[][] geoTransforms;
 
     public Sentinel2RasterDataset(String[] bandPaths) {
-        if (bandPaths.length != Constants.BANDS_NUM) {
-            throw new IllegalArgumentException("Invalid band number. Should be " + Constants.BANDS_NUM);
+        if (bandPaths.length != BANDS_NUM) {
+            throw new IllegalArgumentException("Invalid band number. Should be " + BANDS_NUM);
         }
 
         gdal.AllRegister();
-        Dataset[] datasets = new Dataset[Constants.BANDS_NUM];
-        bands = new Band[Constants.BANDS_NUM];
-        double[] transform = new double[6];
+        Dataset[] datasets = new Dataset[BANDS_NUM];
+        bands = new Band[BANDS_NUM];
+        geoTransforms = new double[BANDS_NUM][];
+        double[] transform;
 
         try {
-            for (int i = 0; i < Constants.BANDS_NUM; i++) {
+            for (int i = 0; i < BANDS_NUM; i++) {
                 // load raster
                 if (bands[i] != null) {
+                    transform = new double[6];
                     datasets[i] = gdal.Open(bandPaths[i], gdalconst.GA_ReadOnly);
                     datasets[i].GetGeoTransform(transform);
                     bands[i] = datasets[i].GetRasterBand(1);
+                    geoTransforms[i] = transform;
 
                     // check pixel resolution
                     if ((int) transform[1] != Constants.PIXEL_RESOLUTIONS[i]) {
@@ -38,7 +48,6 @@ public class Sentinel2RasterDataset implements RasterDataset {
                 }
             }
 
-            this.bands = bands;
         } catch(IllegalArgumentException ilEx) {
             delete();
             throw ilEx; // rethrow ex so it is not caught by general catch
@@ -67,14 +76,20 @@ public class Sentinel2RasterDataset implements RasterDataset {
         return new int[0];
     }
 
-    private int[] compute3ResOffsets(Band band10, Band band20, Band band60) {
+    private int[] compute3ResOffsets(int band10idx, int band20idx, int band60idx) {
+        if (bands[band10idx] == null || bands[band20idx] == null || bands[band60idx] == null) {
+            throw new IllegalArgumentException("Not all bands present");
+        }
+        Band band10, band20, band60;
+        band10 = bands[band10idx];
+        band20 = bands[band20idx];
+        band60 = bands[band60idx];
+
         // get geotransforms for bands of different resolutions
-        double[] transform10 = new double[6];
-        double[] transform20 = new double[6];
-        double[] transform60 = new double[6];
-        band10.GetDataset().GetGeoTransform(transform10);
-        band20.GetDataset().GetGeoTransform(transform20);
-        band60.GetDataset().GetGeoTransform(transform60);
+        double[] transform10 = geoTransforms[band10idx];
+        double[] transform20 = geoTransforms[band20idx];
+        double[] transform60 = geoTransforms[band60idx];
+
 
         int x10,y10,x20,y20,x60,y60;
         // get absolute coordinates of upper-left corner
@@ -98,16 +113,16 @@ public class Sentinel2RasterDataset implements RasterDataset {
         yOffset10 = Math.max(0, yOffset10);
 
         // width of intersection in meters
-        int width = x10 + Constants.PIXEL_RESOLUTIONS[1]*band10.getXSize();               //  right border of 10
-        width = Math.min(width, x20 + Constants.PIXEL_RESOLUTIONS[4]*band20.getXSize());  //  right border of 20
-        width = Math.min(width, x60 + Constants.PIXEL_RESOLUTIONS[0]*band60.getXSize());  //  right border of 60
+        int width = x10 + getResolution(res10M)*band10.getXSize();               //  right border of 10
+        width = Math.min(width, x20 + getResolution(res20M)*band20.getXSize());  //  right border of 20
+        width = Math.min(width, x60 + getResolution(res60m)*band60.getXSize());  //  right border of 60
         width -= x10;
         width -= xOffset10;
 
         // height of intersection in meters
-        int height = y10 + Constants.PIXEL_RESOLUTIONS[1]*band10.getYSize();
-        height = Math.min(height, y20 + Constants.PIXEL_RESOLUTIONS[4]*band20.getYSize());
-        height = Math.min(height, y60 + Constants.PIXEL_RESOLUTIONS[0]*band60.getYSize());
+        int height = y10 + getResolution(res10M)*band10.getYSize();
+        height = Math.min(height, y20 + getResolution(res20M)*band20.getYSize());
+        height = Math.min(height, y60 + getResolution(res60m)*band60.getYSize());
         height -= y10;
         height -= yOffset10;
 

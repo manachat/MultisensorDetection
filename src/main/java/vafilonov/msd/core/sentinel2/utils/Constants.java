@@ -9,6 +9,17 @@ public final class Constants {
         return PIXEL_RESOLUTIONS[band.ordinal()];
     }
 
+    public static int getResolution(Resolution res) {
+        switch (res) {
+            case res10M:
+                return 10;
+            case res20M:
+                return 20;
+            case res60m:
+                return 60;
+        }
+    }
+
     public static String getBandName(Sentinel2Band band) {
         return BAND_NAMES[band.ordinal()];
     }
