@@ -14,6 +14,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import vafilonov.msd.Main;
+import vafilonov.msd.utils.Constants;
 import vafilonov.msd.utils.Renderer;
 
 import java.io.File;
@@ -254,16 +255,16 @@ public class MainSceneController {
 
     @FXML
     private void renderRGBClickHandler(MouseEvent e) throws Exception {
-        if (t1Boxes.get(bands.B2.ordinal()).getValue() == null ||
-                t1Boxes.get(bands.B3.ordinal()).getValue() == null ||
-                t1Boxes.get(bands.B4.ordinal()).getValue() == null) {
+        if (t1Boxes.get(Constants.Bands.B2.ordinal()).getValue() == null ||
+                t1Boxes.get(Constants.Bands.B3.ordinal()).getValue() == null ||
+                t1Boxes.get(Constants.Bands.B4.ordinal()).getValue() == null) {
             showAlertMessage("Error", "RGB bands (2,3,4) not set.");
             return;
         }
 
-        String blue = t1Boxes.get(bands.B2.ordinal()).getValue().getPath();
-        String green = t1Boxes.get(bands.B3.ordinal()).getValue().getPath();
-        String red = t1Boxes.get(bands.B4.ordinal()).getValue().getPath();
+        String blue = t1Boxes.get(Constants.Bands.B2.ordinal()).getValue().getPath();
+        String green = t1Boxes.get(Constants.Bands.B3.ordinal()).getValue().getPath();
+        String red = t1Boxes.get(Constants.Bands.B4.ordinal()).getValue().getPath();
 
         final int[] pixels = Renderer.renderRGBLike(red, green, blue);
         if (pixels == null)
@@ -284,16 +285,16 @@ public class MainSceneController {
 
     @FXML
     private void renderInfraredClickHandler(MouseEvent e) {
-        if (t1Boxes.get(bands.B8.ordinal()).getValue() == null ||
-                t1Boxes.get(bands.B3.ordinal()).getValue() == null ||
-                t1Boxes.get(bands.B4.ordinal()).getValue() == null) {
+        if (t1Boxes.get(Constants.Bands.B8.ordinal()).getValue() == null ||
+                t1Boxes.get(Constants.Bands.B3.ordinal()).getValue() == null ||
+                t1Boxes.get(Constants.Bands.B4.ordinal()).getValue() == null) {
             showAlertMessage("Error", "RGB bands (2,3,4) not set.");
             return;
         }
 
-        String blue = t1Boxes.get(bands.B3.ordinal()).getValue().getPath();
-        String green = t1Boxes.get(bands.B4.ordinal()).getValue().getPath();
-        String red = t1Boxes.get(bands.B8.ordinal()).getValue().getPath();
+        String blue = t1Boxes.get(Constants.Bands.B3.ordinal()).getValue().getPath();
+        String green = t1Boxes.get(Constants.Bands.B4.ordinal()).getValue().getPath();
+        String red = t1Boxes.get(Constants.Bands.B8.ordinal()).getValue().getPath();
 
         final int[] pixels = Renderer.renderRGBLike(red, green, blue);
         if (pixels == null)
@@ -394,20 +395,41 @@ public class MainSceneController {
         msg.show();
     }
 
-    private enum bands {
-        B1,
-        B2,
-        B3,
-        B4,
-        B5,
-        B6,
-        B7,
-        B8,
-        B8A,
-        B9,
-        B10,
-        B11,
-        B12
+    @FXML
+    private void classify(MouseEvent e) throws Exception {
+        String[] paths1 = new String[t1Boxes.size()];
+        String[] paths2 = new String[t2Boxes.size()];
+        int i = 0;
+        for (var box : t1Boxes) {
+            if (box == null || box.getValue() == null) {
+                showAlertMessage("Error", "Not all bands present.");
+                return;
+            }
+            paths1[i++] = box.getValue().getPath();
+        }
+        i = 0;
+        for (var box : t2Boxes) {
+            if (box == null || box.getValue() == null) {
+                showAlertMessage("Error", "Not all bands present.");
+                return;
+            }
+            paths2[i++] = box.getValue().getPath();
+        }
+
+        int[] pixels = Renderer.classifier(paths1, paths2);
+
+        if (pixels == null)
+            return;
+        // width and height
+        int x = pixels[0];
+        int y = pixels[1];
+
+        WritableImage img = new WritableImage(x, y);
+        PixelWriter writer = img.getPixelWriter();
+        writer.setPixels(0, 0, x, y, PixelFormat.getIntArgbInstance(), pixels, 2, x);
+        view.setImage(img);
+        view.setViewport(new Rectangle2D(0, 0, x, y));
+
     }
 
 }

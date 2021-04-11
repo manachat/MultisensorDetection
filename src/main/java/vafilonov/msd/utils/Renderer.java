@@ -5,6 +5,9 @@ import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
 import org.gdal.gdalconst.gdalconstConstants;
+import vafilonov.msd.Main;
+import weka.classifiers.trees.RandomForest;
+import weka.core.*;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -12,6 +15,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import static vafilonov.msd.utils.Constants.BANDS_NUM;
 import static vafilonov.msd.utils.Constants.PIXEL_RESOLUTIONS;
@@ -305,6 +310,210 @@ public class Renderer {
         }
     }
 
+    public static int[] classifier(String[] t1, String[] t2) throws Exception {
+        int[] res = null;
+        gdal.AllRegister();
+        Dataset[] datasets1 = new Dataset[BANDS_NUM];
+        Band[] bands1 = new Band[BANDS_NUM];
+        Dataset[] datasets2 = new Dataset[BANDS_NUM];
+        Band[] bands2 = new Band[BANDS_NUM];
+
+        try {
+            for (int i = 0; i < BANDS_NUM; i++) {
+                // load raster
+                datasets1[i] = gdal.Open(t1[i], gdalconst.GA_ReadOnly);
+                bands1[i] = datasets1[i].GetRasterBand(1);
+                datasets2[i] = gdal.Open(t2[i], gdalconst.GA_ReadOnly);
+                bands2[i] = datasets2[i].GetRasterBand(1);
+                /*// check pixel resolution
+                if ((int)transform[1] != PIXEL_RESOLUTIONS[i]) {
+                    throw new IllegalArgumentException("Invalid band resolution of  " + BAND_NAMES[i] +
+                            ". Expected: " + PIXEL_RESOLUTIONS[i] + ". Actual: " + transform[1]);
+                }*/
+            }
+            System.out.println("opened");
+            res = makeClassification(bands1, bands2);
+
+        } /*catch(IllegalArgumentException ilEx) {
+            throw ilEx; // rethrow ex so it is not caught by general catch
+
+        } catch(Exception ex) {
+            System.out.println(ex.getClass().toString());
+            throw new RuntimeException("Error in file opening.");
+
+        } */finally {
+            for (var set : datasets1) {
+                if (set != null)
+                    set.delete();
+            }
+            for (var set : datasets2) {
+                if (set != null)
+                    set.delete();
+            }
+
+        }
+
+        return res;
+    }
+
+    private static int[] makeClassification(Band[] t1, Band[] t2) throws Exception {
+        ArrayList<Attribute> attributes = new ArrayList<>();
+        attributes.add(new Attribute("Mark"));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B1.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B2.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B3.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B4.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B5.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B6.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B7.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B8.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B8A.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B9.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B10.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B11.ordinal()]));
+        attributes.add(new Attribute(BAND_NAMES[Constants.Bands.B12.ordinal()]));
+        Instances dataset = new Instances("pixels", attributes, 0);
+        dataset.setClassIndex(0);
+
+
+        System.out.println("entered make");
+        RandomForest forest = (RandomForest) SerializationHelper.read(Main.forestPath);
+        Instance t1Instance = new DenseInstance(BANDS_NUM + 1);
+        Instance t2Instance = new DenseInstance(BANDS_NUM + 1);
+        System.out.println("model loaded");
+        t1Instance.setDataset(dataset);
+        t2Instance.setDataset(dataset);
+
+
+        double[] redStats = new double[2];
+        double[] greenStats = new double[2];
+        double[] blueStats = new double[2];
+
+        t1[3].ComputeBandStats(redStats);
+        t1[2].ComputeBandStats(greenStats);
+        t1[1].ComputeBandStats(blueStats);
+
+        // 3 standard deviations
+        int stdnum = 3;
+        double redMin = redStats[0] - stdnum*redStats[1];
+        double redMax = redStats[0] + stdnum*redStats[1];
+        double greenMin = greenStats[0] - stdnum*greenStats[1];
+        double greenMax = greenStats[0] + stdnum*greenStats[1];
+        double blueMin = blueStats[0] - stdnum*blueStats[1];
+        double blueMax = blueStats[0] + stdnum*blueStats[1];
+
+        int[] d = calculateOffsets(t1[1], t1[4], t1[0]);
+        System.out.println(Arrays.toString(d));
+        int width = d[0];
+        int height = d[1];
+        int xOffset10 = d[2];
+        int yOffset10 = d[3];
+        int xOffset20 = d[4];
+        int yOffset20 = d[5];
+        int xOffset60 = d[6];
+        int yOffset60 = d[7];
+
+        int rasterWidth = width / 10;
+        int rasterHeight = height / 10;
+
+        int[] raw = new int[2 + rasterWidth*rasterHeight];
+        raw[0] = rasterWidth;
+        raw[1] = rasterHeight;
+
+        // buffers for rows of data
+        ByteBuffer[] rows1 = new ByteBuffer[BANDS_NUM];
+        ByteBuffer[] rows2 = new ByteBuffer[BANDS_NUM];
+        ShortBuffer[] shorts1 = new ShortBuffer[BANDS_NUM];
+        ShortBuffer[] shorts2 = new ShortBuffer[BANDS_NUM];
+        for (int i = 0; i < rows1.length; i++) {
+            rows1[i] = ByteBuffer.allocateDirect(2*t1[i].GetXSize()).order(ByteOrder.nativeOrder());
+            rows2[i] = ByteBuffer.allocateDirect(2*t2[i].GetXSize()).order(ByteOrder.nativeOrder());
+            shorts1[i] = rows1[i].asShortBuffer();
+            shorts2[i] = rows2[i].asShortBuffer();
+        }
+
+        int rgb_resolution = 10;    //  10m
+
+        for (int y = 0; y < height; y += 10) {
+            System.out.println(y);
+            // refill buffers
+            for (int i = 0; i < BANDS_NUM; i++) {
+                if (PIXEL_RESOLUTIONS[i] == 10) {
+                    rows1[i].clear();
+                    t1[i].ReadRaster_Direct(xOffset10 / PIXEL_RESOLUTIONS[i], (yOffset10 + y) / PIXEL_RESOLUTIONS[i],
+                            width / PIXEL_RESOLUTIONS[i], 1, width / PIXEL_RESOLUTIONS[i], 1,
+                            gdalconst.GDT_Int16, rows1[i]);
+                    t2[i].ReadRaster_Direct(xOffset10 / PIXEL_RESOLUTIONS[i], (yOffset10 + y) / PIXEL_RESOLUTIONS[i],
+                            width / PIXEL_RESOLUTIONS[i], 1, width / PIXEL_RESOLUTIONS[i], 1,
+                            gdalconst.GDT_Int16, rows2[i]);
+
+                } else if (PIXEL_RESOLUTIONS[i] == 20) {
+                    if ((yOffset20 + y) % PIXEL_RESOLUTIONS[i] == 0 || y == 0) {
+                        rows1[i].clear();
+                        t1[i].ReadRaster_Direct(xOffset20 / PIXEL_RESOLUTIONS[i], (yOffset20 + y) / PIXEL_RESOLUTIONS[i],
+                                width / PIXEL_RESOLUTIONS[i], 1, width / PIXEL_RESOLUTIONS[i], 1,
+                                gdalconst.GDT_Int16, rows1[i]);
+                        t2[i].ReadRaster_Direct(xOffset20 / PIXEL_RESOLUTIONS[i], (yOffset20 + y) / PIXEL_RESOLUTIONS[i],
+                                width / PIXEL_RESOLUTIONS[i], 1, width / PIXEL_RESOLUTIONS[i], 1,
+                                gdalconst.GDT_Int16, rows2[i]);
+                    }
+
+                } else {
+                    if ((yOffset60 + y) % PIXEL_RESOLUTIONS[i] == 0 || y == 0) {
+                        rows1[i].clear();
+                        t1[i].ReadRaster_Direct(xOffset60 / PIXEL_RESOLUTIONS[i], (yOffset60 + y) / PIXEL_RESOLUTIONS[i],
+                                width / PIXEL_RESOLUTIONS[i], 1, width / PIXEL_RESOLUTIONS[i], 1,
+                                gdalconst.GDT_Int16, rows1[i]);
+                        t2[i].ReadRaster_Direct(xOffset60 / PIXEL_RESOLUTIONS[i], (yOffset60 + y) / PIXEL_RESOLUTIONS[i],
+                                width / PIXEL_RESOLUTIONS[i], 1, width / PIXEL_RESOLUTIONS[i], 1,
+                                gdalconst.GDT_Int16, rows2[i]);
+                    }
+
+                }
+
+            }
+
+            // write features for each pixel
+            for (int x = 0; x < width; x += 10) {
+                for (int i = 0; i < BANDS_NUM; i++) {
+                    t1Instance.setValue(i + 1, shorts1[i].get(x / PIXEL_RESOLUTIONS[i]));
+                    t2Instance.setValue(i + 1, shorts2[i].get(x / PIXEL_RESOLUTIONS[i]));
+
+                }
+                int class1 = (int) forest.classifyInstance(t1Instance);
+                int class2 = (int) forest.classifyInstance(t2Instance);
+
+                int delta = Math.abs(class1 - class2);
+                int r = (int) ((shorts1[Constants.Bands.B4.ordinal()].get(x / rgb_resolution) - redMin) * 255 / (redMax - redMin));
+                int g = (int) ((shorts1[Constants.Bands.B3.ordinal()].get(x / rgb_resolution) - greenMin) * 255 / (greenMax - greenMin));
+                int b = (int) ((shorts1[Constants.Bands.B2.ordinal()].get(x / rgb_resolution) - blueMin) * 255 / (blueMax - blueMin));
+
+                r = Math.max(0, r);
+                r = Math.min(255, r);
+                g = Math.max(0, g);
+                g = Math.min(255, g);
+                b = Math.max(0, b);
+                b = Math.min(255, b);
+                // TODO исправить
+                int value = 64 << 24;
+                value = value | r << 16;
+                value = value | g << 8;
+                value = value | b;
+
+                if (delta != 0 && class1 != 0 && class2 != 0) {
+                    //value = Integer.MAX_VALUE;
+                    value = value | (255 << 24);
+
+                }
+
+                raw[2 + (y/rgb_resolution)*rasterWidth + (x/rgb_resolution)] = value;
+
+            }
+        }
+
+        return raw;
+    }
+
     /**
      *
      * @param band10
@@ -343,9 +552,9 @@ public class Renderer {
         yOffset10 = Math.max(0, yOffset10);
 
         // width of intersection in meters
-        int width = x10 + PIXEL_RESOLUTIONS[1]*band10.getXSize();
-        width = Math.min(width, x20 + PIXEL_RESOLUTIONS[4]*band20.getXSize());
-        width = Math.min(width, x60 + PIXEL_RESOLUTIONS[0]*band60.getXSize());
+        int width = x10 + PIXEL_RESOLUTIONS[1]*band10.getXSize();               //  right border of 10
+        width = Math.min(width, x20 + PIXEL_RESOLUTIONS[4]*band20.getXSize());  //  right border of 20
+        width = Math.min(width, x60 + PIXEL_RESOLUTIONS[0]*band60.getXSize());  //  right border of 60
         width -= x10;
         width -= xOffset10;
 
