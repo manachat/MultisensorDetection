@@ -4,6 +4,7 @@ import vafilonov.msd.core.PixelClassifier;
 import vafilonov.msd.core.RasterDataset;
 import vafilonov.msd.core.sentinel2.utils.Constants;
 import vafilonov.msd.core.sentinel2.utils.Biom;
+import vafilonov.msd.core.sentinel2.utils.Sentinel2Band;
 
 import java.nio.ShortBuffer;
 
@@ -15,7 +16,7 @@ public class ClassifierRender extends RGBRender {
     public ClassifierRender(RasterDataset dataset, PixelClassifier classifier) {
         super(dataset);
         this.classifier = classifier;
-
+        traverseMask = new boolean[]{true, true, true, true, true, true, true, true, true, true, true, true, true};
     }
 
 
@@ -24,11 +25,12 @@ public class ClassifierRender extends RGBRender {
         ShortBuffer[] rows = values[0]; // it is assumed that first dataset is presented
         int rasterRow = params[0];
 
-        double[] featureVals = new double[values[0].length];
+        double[] featureVals = new double[Constants.BANDS_NUM];
         for (int i = 0; i < rasterWidth; i++) {
-            int r = (int) ((rows[4].get(i) - redMin) * 255 / (redMax - redMin));
-            int g = (int) ((rows[3].get(i) - greenMin) * 255 / (greenMax - greenMin));
-            int b = (int) ((rows[2].get(i) - blueMin) * 255 / (blueMax - blueMin));
+
+            int r = (int) ((rows[Sentinel2Band.B4.ordinal()].get(i) - redMin) * 255 / (redMax - redMin));
+            int g = (int) ((rows[Sentinel2Band.B3.ordinal()].get(i) - greenMin) * 255 / (greenMax - greenMin));
+            int b = (int) ((rows[Sentinel2Band.B2.ordinal()].get(i) - blueMin) * 255 / (blueMax - blueMin));
 
             r = Math.max(0, r);
             r = Math.min(255, r);
@@ -43,12 +45,12 @@ public class ClassifierRender extends RGBRender {
             value = value | b;
 
             for (int j = 0; j < featureVals.length; j++) {
-                featureVals[j] = values[0][j].get(i*10 / Constants.PIXEL_RESOLUTIONS[i]);
+                featureVals[j] = values[0][j].get(i*10 / Constants.PIXEL_RESOLUTIONS[j]);
             }
             int classPresent = classifier.classifyPixel(featureVals);
 
             for (int j = 0; j < featureVals.length; j++) {
-                featureVals[i] = values[1][j].get(i*10 / Constants.PIXEL_RESOLUTIONS[i]);
+                featureVals[j] = values[1][j].get(i*10 / Constants.PIXEL_RESOLUTIONS[j]);
             }
             int classPast = classifier.classifyPixel(featureVals);
 

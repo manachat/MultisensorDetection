@@ -165,35 +165,6 @@
                         <Insets bottom="5.0" top="5.0" />
                     </VBox.margin>
                 </Separator>
-            <Button fx:id="outputDatasetButton" mnemonicParsing="false" onMouseClicked="#chooseDatasetFileClickHandler" text="Choose output file">
-               <VBox.margin>
-                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-               </VBox.margin>
-            </Button>
-                <HBox prefHeight="10.0" prefWidth="200.0">
-                    <children>
-                        <Label minHeight="10.0" minWidth="80.0" text="Class mark:">
-                            <HBox.margin>
-                                <Insets bottom="5.0" left="5.0" top="5.0" />
-                            </HBox.margin>
-                        </Label>
-                        <TextField fx:id="classMarkTextField" promptText="class mark">
-                            <HBox.margin>
-                                <Insets right="5.0" />
-                            </HBox.margin>
-                        </TextField>
-                    </children>
-                </HBox>
-                <Button fx:id="createDatasetButton" minHeight="10.0" mnemonicParsing="false" onMouseClicked="#createDatasetClickHandler" text="Create Dataset">
-                    <VBox.margin>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                    </VBox.margin>
-                </Button>
-                <Separator prefWidth="200.0">
-                    <VBox.margin>
-                        <Insets bottom="5.0" top="5.0" />
-                    </VBox.margin>
-                </Separator>
             <Button mnemonicParsing="false" text="Button" onMouseClicked="#classify"/>
             </children>
         </VBox>

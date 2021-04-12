@@ -9,6 +9,7 @@ import vafilonov.msd.core.RasterTraverser;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
+import java.util.Arrays;
 
 import static vafilonov.msd.core.sentinel2.utils.Constants.BANDS_NUM;
 import static vafilonov.msd.core.sentinel2.utils.Constants.PIXEL_RESOLUTIONS;
@@ -54,8 +55,10 @@ public class Sentinel2RasterTraverser implements RasterTraverser<ShortBuffer[][]
         // allocate buffers for bands
         for (int i = 0; i < datasets.length; i++) {
             for (int j = 0; j < BANDS_NUM; j++) {
-                if (bands[i][j] != null && traverseMask[i]) {
+                if (bands[i][j] != null && traverseMask[j]) {
+
                     buffers[i][j] = ByteBuffer.allocateDirect(2*bands[i][j].GetXSize()).order(ByteOrder.nativeOrder());
+                    shorts[i][j] = buffers[i][j].asShortBuffer();
                 }
             }
         }
@@ -67,7 +70,8 @@ public class Sentinel2RasterTraverser implements RasterTraverser<ShortBuffer[][]
 
             for (int i = 0; i < datasets.length; i++) {
                 for (int j = 0; j < BANDS_NUM; j++) {
-                    if (traverseMask[j] && bands[i][j] == null) {
+
+                    if (!traverseMask[j] || bands[i][j] == null) {
                         continue;
                     }
 

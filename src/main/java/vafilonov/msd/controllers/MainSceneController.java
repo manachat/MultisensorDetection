@@ -1,5 +1,6 @@
 package vafilonov.msd.controllers;
 
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;
@@ -14,13 +15,23 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import vafilonov.msd.Main;
+import vafilonov.msd.core.PixelClassifier;
+import vafilonov.msd.core.RasterDataset;
+import vafilonov.msd.core.renders.ClassifierRender;
+import vafilonov.msd.core.renders.RGBRender;
+import vafilonov.msd.core.sentinel2.Sentinel2PixelClassifier;
+import vafilonov.msd.core.sentinel2.Sentinel2RasterDataset;
+import vafilonov.msd.core.sentinel2.Sentinel2RasterTraverser;
+import vafilonov.msd.core.sentinel2.utils.Constants;
 import vafilonov.msd.core.sentinel2.utils.Sentinel2Band;
 import vafilonov.msd.core.Renderer;
 
+import javax.swing.*;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
 public class MainSceneController {
@@ -254,28 +265,37 @@ public class MainSceneController {
 
 
     @FXML
-    private void renderRGBClickHandler(MouseEvent e) throws Exception {
+    private void renderRGBClickHandler(MouseEvent e) {
         if (t1Boxes.get(Sentinel2Band.B2.ordinal()).getValue() == null ||
                 t1Boxes.get(Sentinel2Band.B3.ordinal()).getValue() == null ||
                 t1Boxes.get(Sentinel2Band.B4.ordinal()).getValue() == null) {
             showAlertMessage("Error", "RGB bands (2,3,4) not set.");
             return;
         }
+        String[] paths = new String[Constants.BANDS_NUM];
+        int i = 0;
+        for (ComboBox<File> b : t1Boxes) {
+            if (b.getValue() != null)
+                paths[i++] = b.getValue().getPath();
+            else
+                paths[i++] = null;
+        }
+        System.out.println(Arrays.toString(paths));
+        Sentinel2RasterDataset set = Sentinel2RasterDataset.loadDataset(paths);
+        RGBRender renderer = new RGBRender(set);
+        Sentinel2RasterTraverser tr = new Sentinel2RasterTraverser();
+        tr.traverseRaster(renderer, new RasterDataset[]{set}, renderer.getTraverseMask());
 
-        String blue = t1Boxes.get(Sentinel2Band.B2.ordinal()).getValue().getPath();
-        String green = t1Boxes.get(Sentinel2Band.B3.ordinal()).getValue().getPath();
-        String red = t1Boxes.get(Sentinel2Band.B4.ordinal()).getValue().getPath();
-
-        final int[] pixels = Renderer.renderRGBLike(red, green, blue);
+        final int[] pixels = renderer.getRaster();
         if (pixels == null)
             return;
         // width and height
-        int x = pixels[0];
-        int y = pixels[1];
+        int x = renderer.getRasterWidth();
+        int y = renderer.getRasterHeight();
 
         WritableImage img = new WritableImage(x, y);
         PixelWriter writer = img.getPixelWriter();
-        writer.setPixels(0, 0, x, y, PixelFormat.getIntArgbInstance(), pixels, 2, x);
+        writer.setPixels(0, 0, x, y, PixelFormat.getIntArgbInstance(), pixels, 0, x);
         view.setImage(img);
         view.setViewport(new Rectangle2D(0, 0, x, y));
 
@@ -308,51 +328,6 @@ public class MainSceneController {
         writer.setPixels(0, 0, x, y, PixelFormat.getIntArgbInstance(), pixels, 2, x);
         view.setImage(img);
         view.setViewport(new Rectangle2D(0, 0, x, y));
-    }
-
-    @FXML
-    private void chooseDatasetFileClickHandler(MouseEvent e) {
-        final FileChooser chooser = new FileChooser();
-        chooser.setTitle("Choose output file");
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Dataset file(.csv)", "*.csv"));
-        var res = chooser.showSaveDialog(Main.stage);
-        Path path = Paths.get(res.getAbsolutePath() + ".csv");
-        String simpleName = path.getFileName().toString();
-        outputDatasetFilePath = path;
-        outputDatasetButton.setText(simpleName);
-    }
-
-    @FXML
-    private void createDatasetClickHandler(MouseEvent e) {
-        if (outputDatasetFilePath == null) {
-            showAlertMessage("Error", "Output file not set.");
-            return;
-        }
-
-        int mark = -1;
-        if (classMarkTextField.getText() == null || classMarkTextField.getText().isBlank()) {
-            showAlertMessage("Error", "Class mark not set.");
-            return;
-        }
-
-        try {
-            mark = Integer.parseInt(classMarkTextField.getText());
-        } catch (NumberFormatException numEx) {
-            showAlertMessage("Error", "Invalid integer format");
-            return;
-        }
-
-        String[] paths = new String[t1Boxes.size()];
-        int i = 0;
-        for (var box : t1Boxes) {
-            if (box == null || box.getValue() == null) {
-                showAlertMessage("Error", "Not all bands present.");
-                return;
-            }
-            paths[i++] = box.getValue().getPath();
-        }
-
-        Renderer.createDataset(mark, outputDatasetFilePath.toString(), paths);// TODO remove
     }
 
 
@@ -395,6 +370,7 @@ public class MainSceneController {
         msg.show();
     }
 
+    @Deprecated
     @FXML
     private void classify(MouseEvent e) throws Exception {
         String[] paths1 = new String[t1Boxes.size()];
@@ -416,17 +392,24 @@ public class MainSceneController {
             paths2[i++] = box.getValue().getPath();
         }
 
-        int[] pixels = Renderer.classifier(paths1, paths2);
+        RasterDataset present = Sentinel2RasterDataset.loadDataset(paths1);
+        RasterDataset past = Sentinel2RasterDataset.loadDataset(paths2);
+        PixelClassifier classifier = Sentinel2PixelClassifier.loadClassifier(Main.class.getResource("/models/logistic_full.model").getPath());
+        ClassifierRender render = new ClassifierRender(present, classifier);
+        Sentinel2RasterTraverser tr = new Sentinel2RasterTraverser();
+        tr.traverseRaster(render, new RasterDataset[]{present, past}, render.getTraverseMask());
+
+        int[] pixels = render.getRaster();
 
         if (pixels == null)
             return;
         // width and height
-        int x = pixels[0];
-        int y = pixels[1];
+        int x = render.getRasterWidth();
+        int y = render.getRasterHeight();
 
         WritableImage img = new WritableImage(x, y);
         PixelWriter writer = img.getPixelWriter();
-        writer.setPixels(0, 0, x, y, PixelFormat.getIntArgbInstance(), pixels, 2, x);
+        writer.setPixels(0, 0, x, y, PixelFormat.getIntArgbInstance(), pixels, 0, x);
         view.setImage(img);
         view.setViewport(new Rectangle2D(0, 0, x, y));
 

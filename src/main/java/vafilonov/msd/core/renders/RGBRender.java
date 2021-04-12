@@ -6,6 +6,7 @@ import vafilonov.msd.core.sentinel2.utils.Constants;
 import vafilonov.msd.core.sentinel2.utils.Sentinel2Band;
 
 import java.nio.ShortBuffer;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -14,6 +15,8 @@ public class RGBRender extends AbstractRender implements PixelAction<ShortBuffer
 
     public RGBRender(RasterDataset dataset) {
         super(dataset);
+
+        traverseMask = new boolean[]{false,true,true,true,false,false,false,false,false,false,false,false,false};
 
         double[] redStats = new double[2];
         double[] greenStats = new double[2];
@@ -45,9 +48,10 @@ public class RGBRender extends AbstractRender implements PixelAction<ShortBuffer
         ShortBuffer[] rows = values[0]; // it is assumed that first dataset is presented
         int rasterRow = params[0];
         for (int i = 0; i < rasterWidth; i++) {
-            int r = (int) ((rows[4].get(i) - redMin) * 255 / (redMax - redMin));
-            int g = (int) ((rows[3].get(i) - greenMin) * 255 / (greenMax - greenMin));
-            int b = (int) ((rows[2].get(i) - blueMin) * 255 / (blueMax - blueMin));
+
+            int r = (int) ((rows[Sentinel2Band.B4.ordinal()].get(i) - redMin) * 255 / (redMax - redMin));
+            int g = (int) ((rows[Sentinel2Band.B3.ordinal()].get(i) - greenMin) * 255 / (greenMax - greenMin));
+            int b = (int) ((rows[Sentinel2Band.B2.ordinal()].get(i) - blueMin) * 255 / (blueMax - blueMin));
 
             r = Math.max(0, r);
             r = Math.min(255, r);
