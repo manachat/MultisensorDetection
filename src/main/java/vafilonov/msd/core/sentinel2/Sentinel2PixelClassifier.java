@@ -10,15 +10,14 @@ import weka.core.SerializationHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import static vafilonov.msd.core.sentinel2.utils.Constants.*;
 
 public class Sentinel2PixelClassifier implements PixelClassifier {
 
-    private Classifier classifier;
-    Instances dataModel;
-    DenseInstance instance;
+    private final Classifier classifier;
+    private final Instances dataModel;
+    private final DenseInstance instance;
 
 
     private Sentinel2PixelClassifier(Classifier cl) {
@@ -65,7 +64,10 @@ public class Sentinel2PixelClassifier implements PixelClassifier {
             res = instance.classIndex();
         } catch (Exception ex) {
             res = -1;
+            System.err.println("classification error" + ex.toString()); //TODO убрать на релиз
         }
         return (int) res;
     }
+
+
 }

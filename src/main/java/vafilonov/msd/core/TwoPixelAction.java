@@ -1,6 +1,6 @@
 package vafilonov.msd.core;
 
-public interface TwoPixelAction extends PixelAction {
+public interface TwoPixelAction<V, P> extends PixelAction<V, P> {
 
-    void processPxielPair(RasterDataset first, RasterDataset second);
+    void processPixelPair(V values1, V values2, P params);
 }

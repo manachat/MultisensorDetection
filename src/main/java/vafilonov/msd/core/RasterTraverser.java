@@ -1,4 +1,5 @@
 package vafilonov.msd.core;
 
-public class RasterTraverser {
+public interface RasterTraverser<V, P> {
+    void traverseRaster(PixelAction<V, P> action, RasterDataset[] sets, boolean[] traverseMask);
 }

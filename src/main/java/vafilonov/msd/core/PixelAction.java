@@ -1,6 +1,6 @@
 package vafilonov.msd.core;
 
-public interface PixelAction {
+public interface PixelAction<V,P>{
 
-    void onAction(RasterDataset raster);
+    void processPixel(V values, P params);
 }

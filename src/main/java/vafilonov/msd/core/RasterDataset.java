@@ -4,8 +4,12 @@ import org.gdal.gdal.Band;
 
 public interface RasterDataset {
 
-    public abstract Band[] getAvailableBands();
+    Band[] getBands();
 
-    public abstract int[] computeOffsets();
+    int[] computeOffsets();
+
+    void delete();
+
+    boolean isDisposed();
 
 }
