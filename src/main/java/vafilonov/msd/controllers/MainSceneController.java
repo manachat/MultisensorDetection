@@ -397,8 +397,8 @@ public class MainSceneController {
         RasterDataset present = Sentinel2RasterDataset.loadDataset(paths1);
         RasterDataset past = Sentinel2RasterDataset.loadDataset(paths2);
 
-        PixelClassifier classifierPresent = Sentinel2PixelClassifier.loadClassifier(Main.class.getResource("/models/svm_full20_arif.model").getPath(), signif);
-        PixelClassifier classifierPast = Sentinel2PixelClassifier.loadClassifier(Main.class.getResource("/models/svm_full15_arif.model").getPath(), signif);
+        PixelClassifier classifierPresent = Sentinel2PixelClassifier.loadClassifier(Main.class.getResource("/models/svm_ndvi_20_denorm.model").getPath(), signif);
+        PixelClassifier classifierPast = Sentinel2PixelClassifier.loadClassifier(Main.class.getResource("/models/svm_ndvi_15_denorm.model").getPath(), signif);
 
         ClassifierRender render = new ClassifierRender(present, new PixelClassifier[]{classifierPresent, classifierPast});
 
