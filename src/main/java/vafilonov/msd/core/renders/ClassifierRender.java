@@ -78,7 +78,7 @@ public class ClassifierRender extends RGBRender {
      */
     public int colorMapper(int pastClass, int presentClass, int value) {
         if (pastClass == presentClass || pastClass < 0 || presentClass < 0){
-            return Color.WHITE.getRGB();
+            return value;
         } else {
             return (255 << 24) | map[pastClass][presentClass].getRGB() ; //TODO переделать
         }
