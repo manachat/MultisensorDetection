@@ -24,7 +24,6 @@ public class Sentinel2PixelClassifier implements PixelClassifier {
         classifier = cl;
 
         ArrayList<Attribute> attributes = new ArrayList<>();
-        attributes.add(new Attribute("Mark", Arrays.asList("1","2","3","4","5")));
         attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B1.ordinal()]));
         attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B2.ordinal()]));
         attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B3.ordinal()]));
@@ -38,8 +37,9 @@ public class Sentinel2PixelClassifier implements PixelClassifier {
         attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B10.ordinal()]));
         attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B11.ordinal()]));
         attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B12.ordinal()]));
+        attributes.add(new Attribute("Mark", Arrays.asList("1","2","3","4","5")));
         dataModel = new Instances("pixels", attributes, 0);
-        dataModel.setClassIndex(0);
+        dataModel.setClassIndex(13);
         
         instance = new DenseInstance(1 + BANDS_NUM);
         instance.setDataset(dataModel);

@@ -39,7 +39,7 @@ public class ClassifierRender extends RGBRender {
             b = Math.max(0, b);
             b = Math.min(255, b);
 
-            int value = 255 << 24;
+            int value = 128 << 24;
             value = value | r << 16;
             value = value | g << 8;
             value = value | b;
@@ -70,10 +70,10 @@ public class ClassifierRender extends RGBRender {
      * @return argb color int
      */
     public int colorMapper(int pastClass, int presentClass) {
-        if (pastClass == presentClass || pastClass == Biom.CLOUDS.ordinal() || presentClass == Biom.CLOUDS.ordinal()){
+        if (pastClass == presentClass){
             return -1;
         } else {
-            return (255 << 24) | map[pastClass - 1][presentClass - 1] ; //TODO переделать
+            return (255 << 24) | map[pastClass][presentClass] ; //TODO переделать
         }
 
     }
@@ -83,11 +83,11 @@ public class ClassifierRender extends RGBRender {
     // 599776 - blue
     // 13942845 - ohra
     private static int[][] map ={
-            {    -1, 2666570, 599776, 13942845, 2894892},
-            {805403,      -1, 599776, 13942845, 2894892},
-            {805403, 2666570,     -1, 13942845, 2894892},
-            {805403, 2666570, 599776,       -1, 2894892},
-            {805403, 2666570, 599776, 13942845,      -1}
+            {    -1, 2666570, 2894892, 805403, 13942845},
+            {599776,      -1, 2894892, 805403, 13942845},
+            {599776, 2666570,      -1, 805403, 13942845},
+            {599776, 2666570, 2894892,     -1, 13942845},
+            {599776, 2666570, 2894892, 805403,       -1}
     };
 
 }

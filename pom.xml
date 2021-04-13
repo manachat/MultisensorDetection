@@ -72,6 +72,14 @@
             <version>1.9.7</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/nz.ac.waikato.cms.weka/LibSVM -->
+        <dependency>
+            <groupId>nz.ac.waikato.cms.weka</groupId>
+            <artifactId>LibSVM</artifactId>
+            <version>1.0.10</version>
+        </dependency>
+
+
 
     </dependencies>
 
