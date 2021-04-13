@@ -37,11 +37,12 @@ public class Sentinel2PixelClassifier implements PixelClassifier {
         attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B10.ordinal()]));
         attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B11.ordinal()]));
         attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B12.ordinal()]));
+        attributes.add(new Attribute("NDVI"));
         attributes.add(new Attribute("Mark", Arrays.asList("1","2","3","4","5")));
         dataModel = new Instances("pixels", attributes, 0);
-        dataModel.setClassIndex(13);
+        dataModel.setClassIndex(14);
         
-        instance = new DenseInstance(1 + BANDS_NUM);
+        instance = new DenseInstance(1 + BANDS_NUM + 1);    // bands + class + index
         instance.setDataset(dataModel);
     }
 
@@ -56,8 +57,10 @@ public class Sentinel2PixelClassifier implements PixelClassifier {
     public int classifyPixel(double[] featureValues) {
         for (int i = 0; i < BANDS_NUM; i++) {
             instance.setValue(i, featureValues[i]);
-            
         }
+        double b8 = featureValues[Sentinel2Band.B8.ordinal()];
+        double b4 = featureValues[Sentinel2Band.B4.ordinal()];
+        instance.setValue(13, (b8 - b4) / (b8 + b4));   // NDVI
         double res;
         try {
             res = classifier.classifyInstance(instance);

@@ -40,7 +40,7 @@ public class ClassifierRender extends RGBRender {
             b = Math.max(0, b);
             b = Math.min(255, b);
 
-            int value = 128 << 24;
+            int value = 255 << 24;
             value = value | r << 16;
             value = value | g << 8;
             value = value | b;
@@ -72,7 +72,7 @@ public class ClassifierRender extends RGBRender {
      */
     public int colorMapper(int pastClass, int presentClass) {
         if (pastClass == presentClass){
-            return Color.WHITE.getRGB();
+            return -1;
         } else {
             return (255 << 24) | map[pastClass][presentClass].getRGB() ; //TODO переделать
         }
@@ -84,11 +84,11 @@ public class ClassifierRender extends RGBRender {
     // 599776 - blue
     // 13942845 - ohra
     private static Color[][] map ={
-            {    null, Color.CYAN, Color.RED, Color.GREEN, Color.YELLOW},
-            {Color.BLUE,      null, Color.RED, Color.GREEN, Color.YELLOW},
-            {Color.BLUE, Color.CYAN,      null, Color.GREEN, Color.YELLOW},
-            {Color.BLUE, Color.CYAN, Color.RED,     null, Color.YELLOW},
-            {Color.BLUE, Color.CYAN, Color.RED, Color.GREEN,       null}
+            {    null, new Color(0x93F1B9), new Color(0x9E9ED0), new Color(0x0C7D77), new Color(0x698D1B) },
+            {new Color(0x86A8EC),      null, new Color(0xE85F9F), new Color(0x149714), new Color(0xBDBD37)},
+            {new Color(0x6B9CF5), new Color(0x65E00F), null, new Color(0x00781E), new Color(0x787878)},
+            {new Color(0x2B6DEF), new Color(0x929528), new Color(0xE72727),     null, new Color(0xFAFA3F)},
+            {new Color(0x0909EA), new Color(0xA5F56D), new Color(0x7B237B), new Color(0x567160),  null}
     };
 
 }
