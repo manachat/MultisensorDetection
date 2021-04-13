@@ -6,6 +6,7 @@ import vafilonov.msd.core.sentinel2.utils.Constants;
 import vafilonov.msd.core.sentinel2.utils.Biom;
 import vafilonov.msd.core.sentinel2.utils.Sentinel2Band;
 
+import java.awt.*;
 import java.nio.ShortBuffer;
 
 
@@ -71,9 +72,9 @@ public class ClassifierRender extends RGBRender {
      */
     public int colorMapper(int pastClass, int presentClass) {
         if (pastClass == presentClass){
-            return -1;
+            return Color.WHITE.getRGB();
         } else {
-            return (255 << 24) | map[pastClass][presentClass] ; //TODO переделать
+            return (255 << 24) | map[pastClass][presentClass].getRGB() ; //TODO переделать
         }
 
     }
@@ -82,12 +83,12 @@ public class ClassifierRender extends RGBRender {
     // 2666570 - light green
     // 599776 - blue
     // 13942845 - ohra
-    private static int[][] map ={
-            {    -1, 2666570, 2894892, 805403, 13942845},
-            {599776,      -1, 2894892, 805403, 13942845},
-            {599776, 2666570,      -1, 805403, 13942845},
-            {599776, 2666570, 2894892,     -1, 13942845},
-            {599776, 2666570, 2894892, 805403,       -1}
+    private static Color[][] map ={
+            {    null, Color.CYAN, Color.RED, Color.GREEN, Color.YELLOW},
+            {Color.BLUE,      null, Color.RED, Color.GREEN, Color.YELLOW},
+            {Color.BLUE, Color.CYAN,      null, Color.GREEN, Color.YELLOW},
+            {Color.BLUE, Color.CYAN, Color.RED,     null, Color.YELLOW},
+            {Color.BLUE, Color.CYAN, Color.RED, Color.GREEN,       null}
     };
 
 }
