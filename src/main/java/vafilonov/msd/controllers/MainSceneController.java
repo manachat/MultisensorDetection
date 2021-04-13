@@ -391,10 +391,10 @@ public class MainSceneController {
             }
             paths2[i++] = box.getValue().getPath();
         }
-
+        // Main.class.getResource("/models/logistic_full.model").getPath()
         RasterDataset present = Sentinel2RasterDataset.loadDataset(paths1);
         RasterDataset past = Sentinel2RasterDataset.loadDataset(paths2);
-        PixelClassifier classifier = Sentinel2PixelClassifier.loadClassifier(Main.class.getResource("/models/logistic_full.model").getPath());
+        PixelClassifier classifier = Sentinel2PixelClassifier.loadClassifier(Main.class.getResource("/models/lib_linear_first.model").getPath());
         ClassifierRender render = new ClassifierRender(present, classifier);
         Sentinel2RasterTraverser tr = new Sentinel2RasterTraverser();
         tr.traverseRaster(render, new RasterDataset[]{present, past}, render.getTraverseMask());
@@ -412,6 +412,8 @@ public class MainSceneController {
         writer.setPixels(0, 0, x, y, PixelFormat.getIntArgbInstance(), pixels, 0, x);
         view.setImage(img);
         view.setViewport(new Rectangle2D(0, 0, x, y));
+        present.delete();
+        past.delete();
 
     }
 

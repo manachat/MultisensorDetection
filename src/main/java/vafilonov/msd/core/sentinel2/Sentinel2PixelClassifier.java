@@ -24,7 +24,7 @@ public class Sentinel2PixelClassifier implements PixelClassifier {
         classifier = cl;
 
         ArrayList<Attribute> attributes = new ArrayList<>();
-        attributes.add(new Attribute("Mark", Arrays.asList("0","1","2","3","4","5")));
+        attributes.add(new Attribute("Mark", Arrays.asList("1","2","3","4","5")));
         attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B1.ordinal()]));
         attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B2.ordinal()]));
         attributes.add(new Attribute(BAND_NAMES[Sentinel2Band.B3.ordinal()]));
@@ -46,6 +46,7 @@ public class Sentinel2PixelClassifier implements PixelClassifier {
     }
 
     public static PixelClassifier loadClassifier(String modelPath) throws Exception {
+
         Classifier clf = (Classifier) SerializationHelper.read(modelPath);
         Sentinel2PixelClassifier created = new Sentinel2PixelClassifier(clf);
         return created;
@@ -60,8 +61,7 @@ public class Sentinel2PixelClassifier implements PixelClassifier {
         double res;
         try {
             res = classifier.classifyInstance(instance);
-            instance.setClassValue(res);
-            res = instance.classIndex();
+            return (int) res;
         } catch (Exception ex) {
             res = -1;
             System.err.println("classification error" + ex.toString()); //TODO убрать на релиз
