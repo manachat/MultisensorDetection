@@ -1,9 +1,9 @@
 package vafilonov.msd.controllers;
 
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
@@ -14,6 +14,7 @@ import javafx.scene.image.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import vafilonov.msd.Main;
 import vafilonov.msd.core.PixelClassifier;
 import vafilonov.msd.core.RasterDataset;
@@ -24,21 +25,25 @@ import vafilonov.msd.core.sentinel2.Sentinel2RasterDataset;
 import vafilonov.msd.core.sentinel2.Sentinel2RasterTraverser;
 import vafilonov.msd.core.sentinel2.utils.Constants;
 import vafilonov.msd.core.sentinel2.utils.Sentinel2Band;
-import vafilonov.msd.core.Renderer;
 
 import javax.swing.*;
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Properties;
 
 
 public class MainSceneController {
 
     private static final int MENU_BAR_PREF_HEIGHT = 25;
 
-    private Path outputDatasetFilePath = null;
+    private Stage stage;
+
+    private Scene scene;
+
+    private Properties config;
+
+    private RasterDatasetManager datasetManager = new RasterDatasetManager();
 
     @FXML
     private VBox toolsVBox;
@@ -69,48 +74,6 @@ public class MainSceneController {
     @FXML
     private VBox vBoxT1;
 
-    @FXML
-    private Button fileChooseT1;
-
-    @FXML
-    private ComboBox<File> b1ComboBoxT1;
-
-    @FXML
-    private ComboBox<File> b2ComboBoxT1;
-
-    @FXML
-    private ComboBox<File> b3ComboBoxT1;
-
-    @FXML
-    private ComboBox<File> b4ComboBoxT1;
-
-    @FXML
-    private ComboBox<File> b5ComboBoxT1;
-
-    @FXML
-    private ComboBox<File> b6ComboBoxT1;
-
-    @FXML
-    private ComboBox<File> b7ComboBoxT1;
-
-    @FXML
-    private ComboBox<File> b8ComboBoxT1;
-
-    @FXML
-    private ComboBox<File> b8aComboBoxT1;
-
-    @FXML
-    private ComboBox<File> b9ComboBoxT1;
-
-    @FXML
-    private ComboBox<File> b10ComboBoxT1;
-
-    @FXML
-    private ComboBox<File> b11ComboBoxT1;
-
-    @FXML
-    private ComboBox<File> b12ComboBoxT1;
-
     private final ArrayList<ComboBox<File>> t1Boxes = new ArrayList<>(13);
 
 
@@ -119,70 +82,28 @@ public class MainSceneController {
     @FXML
     private VBox vBoxT2;
 
-    @FXML
-    private Button fileChooseT2;
-
-    @FXML
-    private ComboBox<File> b1ComboBoxT2;
-
-    @FXML
-    private ComboBox<File> b2ComboBoxT2;
-
-    @FXML
-    private ComboBox<File> b3ComboBoxT2;
-
-    @FXML
-    private ComboBox<File> b4ComboBoxT2;
-
-    @FXML
-    private ComboBox<File> b5ComboBoxT2;
-
-    @FXML
-    private ComboBox<File> b6ComboBoxT2;
-
-    @FXML
-    private ComboBox<File> b7ComboBoxT2;
-
-    @FXML
-    private ComboBox<File> b8ComboBoxT2;
-
-    @FXML
-    private ComboBox<File> b8aComboBoxT2;
-
-    @FXML
-    private ComboBox<File> b9ComboBoxT2;
-
-    @FXML
-    private ComboBox<File> b10ComboBoxT2;
-
-    @FXML
-    private ComboBox<File> b11ComboBoxT2;
-
-    @FXML
-    private ComboBox<File> b12ComboBoxT2;
-
     private final ArrayList<ComboBox<File>> t2Boxes = new ArrayList<>(13);
 
 
     @FXML
     public void initialize() {
         initializeComboBoxes();
+
     }
 
-    public void postInitialize() {
+    public void postInitialize(Stage stage, Properties props) {
+        this.stage = stage;
+        config = props;
+        scene = stage.getScene();
 
-        Main.scene.widthProperty().addListener(value -> {
-
-            view.setFitWidth(Main.scene.getWidth() - filesVBox.getPrefWidth() - toolsVBox.getPrefWidth());
+        scene.widthProperty().addListener(value -> {
+            view.setFitWidth(scene.getWidth() - filesVBox.getPrefWidth() - toolsVBox.getPrefWidth());
         });
 
-        //filesVBox.prefHeightProperty().bind(Main.scene.heightProperty());
-        //toolsVBox.prefHeightProperty().bind(Main.scene.heightProperty());
-
-        Main.scene.heightProperty().addListener(value -> {
-            view.setFitHeight(Main.scene.getHeight() - MENU_BAR_PREF_HEIGHT);
-            filesVBox.setPrefHeight(Main.scene.getHeight() - MENU_BAR_PREF_HEIGHT-10);
-            toolsVBox.setPrefHeight(Main.scene.getHeight() - MENU_BAR_PREF_HEIGHT-10);
+        scene.heightProperty().addListener(value -> {
+            view.setFitHeight(scene.getHeight() - MENU_BAR_PREF_HEIGHT);
+            filesVBox.setPrefHeight(scene.getHeight() - MENU_BAR_PREF_HEIGHT-10);
+            toolsVBox.setPrefHeight(scene.getHeight() - MENU_BAR_PREF_HEIGHT-10);
         });
     }
 
@@ -244,9 +165,8 @@ public class MainSceneController {
         final FileChooser chooser = new FileChooser();
         chooser.setTitle("Choose files");
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Satellite-2 data (*.tif, *.jp2)", "*.jp2", "*.tif"));
-        //chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Satellite-2 data: ", "*.jp2", "*.tif"));
 
-        var files = chooser.showOpenMultipleDialog(Main.stage);
+        var files = chooser.showOpenMultipleDialog(stage);
 
         if (files == null) {
             return;

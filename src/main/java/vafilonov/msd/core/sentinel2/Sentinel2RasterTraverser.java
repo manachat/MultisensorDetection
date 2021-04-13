@@ -10,11 +10,15 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 import java.util.Arrays;
+import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.RecursiveAction;
 
 import static vafilonov.msd.core.sentinel2.utils.Constants.BANDS_NUM;
 import static vafilonov.msd.core.sentinel2.utils.Constants.PIXEL_RESOLUTIONS;
 
+@Deprecated
 public class Sentinel2RasterTraverser implements RasterTraverser<ShortBuffer[][],int[]> {
+    int a = 10;
 
     @Override
     public void traverseRaster(PixelAction<ShortBuffer[][], int[]> action, RasterDataset[] sets, boolean[] traverseMask) {
@@ -107,15 +111,43 @@ public class Sentinel2RasterTraverser implements RasterTraverser<ShortBuffer[][]
 
             params[1] = 0;
             action.processPixel(shorts, params);
-            /*
-            for (int x = 0; x < width; x += 10) {
-                params[1] = x;
-                action.processPixel(shorts, params);
 
-            }
-             */
 
         }   //  for-y
 
+    }
+
+    private static class SliceTraverser extends RecursiveAction {
+        int maxDepth = 2*Runtime.getRuntime().availableProcessors();
+
+        public SliceTraverser(int depth, int start, int end, PixelAction<ShortBuffer[][], int[]> action, int[] offsets) {
+
+        }
+
+        public void traverseSlice(int start, int end, PixelAction<ShortBuffer[][], int[]> action, ShortBuffer[][] shorts, Band[][] bands, int[] offsets) {
+            int width = offsets[0];
+            int height = offsets[1];
+            int xOffset10 = offsets[2];
+            int yOffset10 = offsets[3];
+            int xOffset20 = offsets[4];
+            int yOffset20 = offsets[5];
+            int xOffset60 = offsets[6];
+            int yOffset60 = offsets[7];
+
+
+
+
+
+        }
+
+
+        @Override
+        protected void compute() {
+            if (depth << 1 < maxDepth) {
+                invokeAll(new , new );
+            } else {
+                // raster
+            }
+        }
     }
 }

@@ -20,47 +20,22 @@ public class ClassifierRender extends RGBRender {
         traverseMask = new boolean[]{true, true, true, true, true, true, true, true, true, true, true, true, true};
     }
 
-
     @Override
-    public void processPixel(ShortBuffer[][] values, int[] params) {
-        ShortBuffer[] rows = values[0]; // it is assumed that first dataset is presented
-        int rasterRow = params[0];
-
+    protected int modifyPixel(int i, int j, int colorValue, ShortBuffer[][] values, int[] params) {
         double[] featureVals = new double[Constants.BANDS_NUM];
-        for (int i = 0; i < rasterWidth; i++) {
-
-            int r = (int) ((rows[Sentinel2Band.B4.ordinal()].get(i) - redMin) * 255 / (redMax - redMin));
-            int g = (int) ((rows[Sentinel2Band.B3.ordinal()].get(i) - greenMin) * 255 / (greenMax - greenMin));
-            int b = (int) ((rows[Sentinel2Band.B2.ordinal()].get(i) - blueMin) * 255 / (blueMax - blueMin));
-
-            r = Math.max(0, r);
-            r = Math.min(255, r);
-            g = Math.max(0, g);
-            g = Math.min(255, g);
-            b = Math.max(0, b);
-            b = Math.min(255, b);
-
-            int value = 255 << 24;
-            value = value | r << 16;
-            value = value | g << 8;
-            value = value | b;
-
-            for (int j = 0; j < featureVals.length; j++) {
-                featureVals[j] = values[0][j].get(i*10 / Constants.PIXEL_RESOLUTIONS[j]);
-            }
-            int classPresent = classifier.classifyPixel(featureVals);
-
-            for (int j = 0; j < featureVals.length; j++) {
-                featureVals[j] = values[1][j].get(i*10 / Constants.PIXEL_RESOLUTIONS[j]);
-            }
-            int classPast = classifier.classifyPixel(featureVals);
-
-            int classColor = colorMapper(classPast, classPresent);  // classified color difference
-            value = classColor == -1 ? value : classColor;
-
-            raster[rasterWidth*rasterRow + i] = value;
+        for (int k = 0; k < featureVals.length; k++) {
+            featureVals[k] = values[0][k].get(i*10 / Constants.PIXEL_RESOLUTIONS[k]);
         }
+        int classPresent = classifier.classifyPixel(featureVals);
 
+        for (int k = 0; k < featureVals.length; k++) {
+            featureVals[k] = values[1][k].get(i*10 / Constants.PIXEL_RESOLUTIONS[k]);
+        }
+        int classPast = classifier.classifyPixel(featureVals);
+
+        int classColor = colorMapper(classPast, classPresent);  // classified color difference
+
+        return classColor == -1 ? colorValue : classColor;
     }
 
     /**

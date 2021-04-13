@@ -9,6 +9,10 @@ public class RasterDatasetManager {
 
     List<RasterDataset> sets = new ArrayList<>();
 
+    public RasterDataset gatherDataset() {
+
+    }
+
     public void deleteSet(RasterDataset set) {
         if (set != null && !set.isDisposed()) {
             set.delete();
