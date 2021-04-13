@@ -373,6 +373,8 @@ public class MainSceneController {
     @Deprecated
     @FXML
     private void classify(MouseEvent e) throws Exception {
+        double signif = 1;
+
         String[] paths1 = new String[t1Boxes.size()];
         String[] paths2 = new String[t2Boxes.size()];
         int i = 0;
@@ -394,9 +396,12 @@ public class MainSceneController {
         // Main.class.getResource("/models/logistic_full.model").getPath()
         RasterDataset present = Sentinel2RasterDataset.loadDataset(paths1);
         RasterDataset past = Sentinel2RasterDataset.loadDataset(paths2);
-        PixelClassifier classifierPresent = Sentinel2PixelClassifier.loadClassifier(Main.class.getResource("/models/svm_full20_arif.model").getPath());
-        PixelClassifier classifierPast = Sentinel2PixelClassifier.loadClassifier(Main.class.getResource("/models/svm_full15_arif.model").getPath());
+
+        PixelClassifier classifierPresent = Sentinel2PixelClassifier.loadClassifier(Main.class.getResource("/models/svm_full20_arif.model").getPath(), signif);
+        PixelClassifier classifierPast = Sentinel2PixelClassifier.loadClassifier(Main.class.getResource("/models/svm_full15_arif.model").getPath(), signif);
+
         ClassifierRender render = new ClassifierRender(present, new PixelClassifier[]{classifierPresent, classifierPast});
+
         Sentinel2RasterTraverser tr = new Sentinel2RasterTraverser();
         tr.traverseRaster(render, new RasterDataset[]{present, past}, render.getTraverseMask());
 

@@ -19,6 +19,16 @@ public class Sentinel2PixelClassifier implements PixelClassifier {
     private final Instances dataModel;
     private final DenseInstance instance;
 
+    public double getSignificance() {
+        return significance;
+    }
+
+    public void setSignificance(double significance) {
+        this.significance = significance;
+    }
+
+    private double significance;
+
 
     private Sentinel2PixelClassifier(Classifier cl) {
         classifier = cl;
@@ -46,12 +56,22 @@ public class Sentinel2PixelClassifier implements PixelClassifier {
     }
 
     public static PixelClassifier loadClassifier(String modelPath) throws Exception {
+        return loadClassifier(modelPath, 0.2);
+    }
 
+    public static PixelClassifier loadClassifier(String modelPath, double significance) throws Exception {
         Classifier clf = (Classifier) SerializationHelper.read(modelPath);
         Sentinel2PixelClassifier created = new Sentinel2PixelClassifier(clf);
+        created.significance = significance;
         return created;
     }
 
+    /**
+     * Возвращает индекс предсказанного класса
+     * Если предсказание ниже уровня значимости, возвращает -1
+     * @param featureValues
+     * @return
+     */
     @Override
     public int classifyPixel(double[] featureValues) {
         for (int i = 0; i < BANDS_NUM; i++) {
@@ -61,10 +81,16 @@ public class Sentinel2PixelClassifier implements PixelClassifier {
         double res;
         try {
             res = classifier.classifyInstance(instance);
-            return (int) res;
+            double p = classifier.distributionForInstance(instance)[(int)res];
+
+            if (p < significance) {
+                return -1;
+            } else {
+                return (int) res;
+            }
         } catch (Exception ex) {
             res = -1;
-            System.err.println("classification error" + ex.toString()); //TODO убрать на релиз
+            System.err.println("classification error" + ex); //TODO убрать на релиз
         }
         return (int) res;
     }

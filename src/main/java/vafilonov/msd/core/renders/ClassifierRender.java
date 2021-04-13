@@ -5,6 +5,7 @@ import vafilonov.msd.core.RasterDataset;
 import vafilonov.msd.core.sentinel2.utils.Constants;
 import vafilonov.msd.core.sentinel2.utils.Sentinel2Band;
 
+import java.awt.*;
 import java.nio.ShortBuffer;
 
 
@@ -46,7 +47,7 @@ public class ClassifierRender extends RGBRender {
             b = Math.max(0, b);
             b = Math.min(255, b);
 
-            int value = 128 << 24;
+            int value = 255 << 24;
             value = value | r << 16;
             value = value | g << 8;
             value = value | b;
@@ -61,8 +62,7 @@ public class ClassifierRender extends RGBRender {
             }
             int classPast = pastClassifier.classifyPixel(pastVals);
 
-            int classColor = colorMapper(classPast, classPresent);  // classified color difference
-            value = classColor == -1 ? value : classColor;
+            value = colorMapper(classPast, classPresent, value);  // classified color difference
 
             raster[rasterWidth*rasterRow + i] = value;
         }
@@ -76,11 +76,11 @@ public class ClassifierRender extends RGBRender {
      * @param presentClass present class
      * @return argb color int
      */
-    public int colorMapper(int pastClass, int presentClass) {
-        if (pastClass == presentClass){
-            return -1;
+    public int colorMapper(int pastClass, int presentClass, int value) {
+        if (pastClass == presentClass || pastClass < 0 || presentClass < 0){
+            return Color.WHITE.getRGB();
         } else {
-            return (255 << 24) | map[pastClass][presentClass] ; //TODO переделать
+            return (255 << 24) | map[pastClass][presentClass].getRGB() ; //TODO переделать
         }
 
     }
@@ -89,12 +89,12 @@ public class ClassifierRender extends RGBRender {
     // 2666570 - light green
     // 599776 - blue
     // 13942845 - ohra
-    private static int[][] map ={
-            {    -1, 2666570, 2894892, 805403, 13942845},
-            {599776,      -1, 2894892, 805403, 13942845},
-            {599776, 2666570,      -1, 805403, 13942845},
-            {599776, 2666570, 2894892,     -1, 13942845},
-            {599776, 2666570, 2894892, 805403,       -1}
+    private static Color[][] map ={
+            {    null, new Color(0x93F1B9), new Color(0x9E9ED0), new Color(0x0C7D77), new Color(0x698D1B) },
+            {new Color(0x86A8EC),      null, new Color(0xE85F9F), new Color(0x149714), new Color(0xBDBD37)},
+            {new Color(0x6B9CF5), new Color(0x65E00F), null, new Color(0x00781E), new Color(0x787878)},
+            {new Color(0x2B6DEF), new Color(0x929528), new Color(0xE72727),     null, new Color(0xFAFA3F)},
+            {new Color(0x0909EA), new Color(0xA5F56D), new Color(0x7B237B), new Color(0x567160),  null}
     };
 
 }
