@@ -394,8 +394,9 @@ public class MainSceneController {
         // Main.class.getResource("/models/logistic_full.model").getPath()
         RasterDataset present = Sentinel2RasterDataset.loadDataset(paths1);
         RasterDataset past = Sentinel2RasterDataset.loadDataset(paths2);
-        PixelClassifier classifier = Sentinel2PixelClassifier.loadClassifier(Main.class.getResource("/models/svm_fullset_arif.model").getPath());
-        ClassifierRender render = new ClassifierRender(present, classifier);
+        PixelClassifier classifierPresent = Sentinel2PixelClassifier.loadClassifier(Main.class.getResource("/models/svm_full20_arif.model").getPath());
+        PixelClassifier classifierPast = Sentinel2PixelClassifier.loadClassifier(Main.class.getResource("/models/svm_full15_arif.model").getPath());
+        ClassifierRender render = new ClassifierRender(present, new PixelClassifier[]{classifierPresent, classifierPast});
         Sentinel2RasterTraverser tr = new Sentinel2RasterTraverser();
         tr.traverseRaster(render, new RasterDataset[]{present, past}, render.getTraverseMask());
 

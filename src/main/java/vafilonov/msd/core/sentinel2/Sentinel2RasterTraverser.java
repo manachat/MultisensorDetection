@@ -19,6 +19,7 @@ public class Sentinel2RasterTraverser implements RasterTraverser<ShortBuffer[][]
     @Override
     public void traverseRaster(PixelAction<ShortBuffer[][], int[]> action, RasterDataset[] sets, boolean[] traverseMask) {
 
+        //  get datasets
         Sentinel2RasterDataset[] datasets = new Sentinel2RasterDataset[sets.length];
         for (int i = 0; i < sets.length; i++) {
             if (sets[i] != null && sets[i] instanceof Sentinel2RasterDataset) {
@@ -28,6 +29,7 @@ public class Sentinel2RasterTraverser implements RasterTraverser<ShortBuffer[][]
             }
         }
 
+        //  get bands and buffers
         Band[][] bands = new Band[datasets.length][];
         double[][][] transforms = new double[datasets.length][][];
         ByteBuffer[][] buffers = new ByteBuffer[sets.length][];
@@ -39,6 +41,7 @@ public class Sentinel2RasterTraverser implements RasterTraverser<ShortBuffer[][]
             shorts[i] = new ShortBuffer[BANDS_NUM];
         }
 
+        //  calculate offsets for traversal
         int[] offsets = sets[0].computeOffsets();
         int width = offsets[0];
         int height = offsets[1];
@@ -65,9 +68,11 @@ public class Sentinel2RasterTraverser implements RasterTraverser<ShortBuffer[][]
 
         int[] params = new int[2];
 
+        //  traverse raster with offsets
         for (int y = 0; y < height; y += 10) {
             params[0] = y/10; // rgb resolution
 
+            //  update band buffers
             for (int i = 0; i < datasets.length; i++) {
                 for (int j = 0; j < BANDS_NUM; j++) {
 

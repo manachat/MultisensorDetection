@@ -3,7 +3,6 @@ package vafilonov.msd.core.renders;
 import vafilonov.msd.core.PixelClassifier;
 import vafilonov.msd.core.RasterDataset;
 import vafilonov.msd.core.sentinel2.utils.Constants;
-import vafilonov.msd.core.sentinel2.utils.Biom;
 import vafilonov.msd.core.sentinel2.utils.Sentinel2Band;
 
 import java.nio.ShortBuffer;
@@ -11,26 +10,34 @@ import java.nio.ShortBuffer;
 
 
 public class ClassifierRender extends RGBRender {
-    PixelClassifier classifier;
+    PixelClassifier presentClassifier;
+    PixelClassifier pastClassifier;
 
-    public ClassifierRender(RasterDataset dataset, PixelClassifier classifier) {
+    public ClassifierRender(RasterDataset dataset, PixelClassifier[] classifiers) {
         super(dataset);
-        this.classifier = classifier;
+        presentClassifier = classifiers[0];
+        if (classifiers.length > 1) {
+            pastClassifier = classifiers[1];
+        }
         traverseMask = new boolean[]{true, true, true, true, true, true, true, true, true, true, true, true, true};
     }
 
 
     @Override
     public void processPixel(ShortBuffer[][] values, int[] params) {
-        ShortBuffer[] rows = values[0]; // it is assumed that first dataset is presented
         int rasterRow = params[0];
 
-        double[] featureVals = new double[Constants.BANDS_NUM];
+        ShortBuffer[] presentRows = values[0]; // it is assumed that first dataset is presented
+
+        //  +1 in case of ndvi
+        double[] presentVals = new double[Constants.BANDS_NUM + 1];
+        double[] pastVals = new double[Constants.BANDS_NUM + 1];
+
         for (int i = 0; i < rasterWidth; i++) {
 
-            int r = (int) ((rows[Sentinel2Band.B4.ordinal()].get(i) - redMin) * 255 / (redMax - redMin));
-            int g = (int) ((rows[Sentinel2Band.B3.ordinal()].get(i) - greenMin) * 255 / (greenMax - greenMin));
-            int b = (int) ((rows[Sentinel2Band.B2.ordinal()].get(i) - blueMin) * 255 / (blueMax - blueMin));
+            int r = (int) ((presentRows[Sentinel2Band.B4.ordinal()].get(i) - redMin) * 255 / (redMax - redMin));
+            int g = (int) ((presentRows[Sentinel2Band.B3.ordinal()].get(i) - greenMin) * 255 / (greenMax - greenMin));
+            int b = (int) ((presentRows[Sentinel2Band.B2.ordinal()].get(i) - blueMin) * 255 / (blueMax - blueMin));
 
             r = Math.max(0, r);
             r = Math.min(255, r);
@@ -44,15 +51,15 @@ public class ClassifierRender extends RGBRender {
             value = value | g << 8;
             value = value | b;
 
-            for (int j = 0; j < featureVals.length; j++) {
-                featureVals[j] = values[0][j].get(i*10 / Constants.PIXEL_RESOLUTIONS[j]);
+            for (int j = 0; j < Constants.BANDS_NUM; j++) {
+                presentVals[j] = values[0][j].get(i*10 / Constants.PIXEL_RESOLUTIONS[j]);
             }
-            int classPresent = classifier.classifyPixel(featureVals);
+            int classPresent = presentClassifier.classifyPixel(presentVals);
 
-            for (int j = 0; j < featureVals.length; j++) {
-                featureVals[j] = values[1][j].get(i*10 / Constants.PIXEL_RESOLUTIONS[j]);
+            for (int j = 0; j < Constants.BANDS_NUM; j++) {
+                pastVals[j] = values[1][j].get(i*10 / Constants.PIXEL_RESOLUTIONS[j]);
             }
-            int classPast = classifier.classifyPixel(featureVals);
+            int classPast = pastClassifier.classifyPixel(pastVals);
 
             int classColor = colorMapper(classPast, classPresent);  // classified color difference
             value = classColor == -1 ? value : classColor;

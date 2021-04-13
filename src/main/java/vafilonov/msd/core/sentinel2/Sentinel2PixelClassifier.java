@@ -55,7 +55,7 @@ public class Sentinel2PixelClassifier implements PixelClassifier {
     @Override
     public int classifyPixel(double[] featureValues) {
         for (int i = 0; i < BANDS_NUM; i++) {
-            instance.setValue(i + 1, featureValues[i]);
+            instance.setValue(i, featureValues[i]);
             
         }
         double res;
