@@ -3,19 +3,20 @@ package vafilonov.msd.controllers;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextField;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.image.*;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import vafilonov.msd.Main;
+import javafx.embed.swing.SwingFXUtils;
+
 import vafilonov.msd.core.PixelClassifier;
 import vafilonov.msd.core.RasterDataset;
 import vafilonov.msd.core.renders.*;
@@ -25,9 +26,12 @@ import vafilonov.msd.core.RasterTraverser;
 import vafilonov.msd.core.sentinel2.utils.Constants;
 import vafilonov.msd.core.sentinel2.utils.Sentinel2Band;
 
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Properties;
 
 
@@ -53,24 +57,18 @@ public class MainSceneController {
 
     private ClassifierRender classifierCache;
 
+    // file to save image
+    private String savepath;
+
     @FXML
     private VBox toolsVBox;
-
-    @FXML
-    private Button renderRgbButton;
-
-    @FXML
-    private TextField classMarkTextField;
-
-    @FXML
-    private Button outputDatasetButton;
-
-    @FXML
-    private Button createDatasetButton;
 
 
     @FXML
     private ImageView view;
+
+    @FXML
+    private BorderPane viewBox;
 
     /* FILE MANAGEMENT VBOX */
 
@@ -80,7 +78,7 @@ public class MainSceneController {
     /* file choose for T1*/
 
     @FXML
-    private VBox vBoxT1;
+    private VBox vBoxPresent;
 
     private final ArrayList<ComboBox<File>> t1Boxes = new ArrayList<>(13);
 
@@ -88,7 +86,7 @@ public class MainSceneController {
     /* File choose for T2*/
 
     @FXML
-    private VBox vBoxT2;
+    private VBox vBoxPast;
 
     private final ArrayList<ComboBox<File>> t2Boxes = new ArrayList<>(13);
 
@@ -105,15 +103,73 @@ public class MainSceneController {
         scene = stage.getScene();
 
         scene.widthProperty().addListener(value -> {
-            view.setFitWidth(scene.getWidth() - filesVBox.getPrefWidth() - toolsVBox.getPrefWidth());
+            //view.setFitWidth(scene.getWidth() - filesVBox.getPrefWidth() - toolsVBox.getPrefWidth());
+
         });
 
         scene.heightProperty().addListener(value -> {
-            view.setFitHeight(scene.getHeight() - MENU_BAR_PREF_HEIGHT);
+            //view.setFitHeight(scene.getHeight() - MENU_BAR_PREF_HEIGHT);
+
             filesVBox.setPrefHeight(scene.getHeight() - MENU_BAR_PREF_HEIGHT-10);
             toolsVBox.setPrefHeight(scene.getHeight() - MENU_BAR_PREF_HEIGHT-10);
         });
+        view.fitWidthProperty().bind(viewBox.widthProperty());
+        view.fitHeightProperty().bind(viewBox.heightProperty());
+        view.setPreserveRatio(false);
+
+        // mouse image drag-and-drop
+        view.setOnMousePressed(e->{
+            initX = e.getSceneX();
+            initY = e.getSceneY();
+            viewBox.setCursor(Cursor.CLOSED_HAND);
+        });
+        view.setOnMouseDragged(e->{
+            viewBox.setCursor(Cursor.CLOSED_HAND);
+            double moveX = initX - e.getSceneX();
+            double moveY = initY - e.getSceneY();
+            initRectX += moveX;
+            initRectY += moveY;
+            view.setViewport(new Rectangle2D(initRectX, initRectY, width/zoom, height/zoom));
+
+            initX = e.getSceneX();
+            initY = e.getSceneY();
+        });
+        view.setOnMouseReleased(e->{
+            viewBox.setCursor(Cursor.OPEN_HAND);
+        });
+
+        // image zoom
+        view.setOnScroll( e -> {
+            double ratioX = e.getSceneX() - initRectX;
+            double ratioY = e.getSceneY() - initRectY;
+
+            double d = e.getDeltaY();
+            if (d > 0) {
+                zoom *= 1.1;
+            } else if (d < 0){
+                zoom /= 1.1;
+            }
+
+            zoom = Math.max(zoom, 0.5);
+            zoom = Math.min(zoom, 10);
+
+            initRectX = e.getSceneX() - ratioX;
+            initRectY = e.getSceneY() - ratioY;
+            view.setViewport(new Rectangle2D(initRectX, initRectY, width/zoom, height/zoom));
+        });
+
+
     }
+
+    double initX;
+    double initY;
+    double zoom;
+    double initRectX;
+    double initRectY;
+    double width;
+    double height;
+
+
 
 
     /**
@@ -121,9 +177,9 @@ public class MainSceneController {
      */
     private void initializeComboBoxes() {
 
-        initBoxes(vBoxT1, t1Boxes);
+        initBoxes(vBoxPresent, t1Boxes);
 
-        initBoxes(vBoxT2, t2Boxes);
+        initBoxes(vBoxPast, t2Boxes);
     }
 
     /**
@@ -238,6 +294,11 @@ public class MainSceneController {
         writer.setPixels(0, 0, x, y, PixelFormat.getIntArgbInstance(), pixels, 0, x);
         view.setImage(img);
         view.setViewport(new Rectangle2D(0, 0, x, y));
+        width = x;
+        height = y;
+        initRectX = 0;
+        initRectY = 0;
+        zoom = 1;
     }
 
 
@@ -380,12 +441,27 @@ public class MainSceneController {
 
     @FXML
     private void saveMenuHandler(ActionEvent event) {
-
+        if (savepath != null) {  // file path was set previously
+            saveSession(savepath);  // try to save session
+        } else {                  // file wasn't set previously
+            saveAsMenuHandler(null);
+        }
     }
 
     @FXML
     private void saveAsMenuHandler(ActionEvent event) {
+        // choose filepath
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Save session");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("IHR", "*.ihr"));
+        File path = chooser.showSaveDialog(scene.getWindow());
 
+        // user haven't aborted choice
+        if (path != null) {
+            if (saveSession(path.getPath())) {  // try to save session
+                savepath = path.getPath();      //set filepath in case of success
+            }
+        }
     }
 
     @FXML
@@ -393,14 +469,27 @@ public class MainSceneController {
 
     }
 
-    @FXML
-    private void loadMenuHandler(ActionEvent event) {
-
-    }
 
     @FXML
     private void aboutMenuHandler(ActionEvent event) {
+        showAlertMessage("About", "Программа разработана в рамках выполения курсовой работы ОП ПИ НИУ ВШЭ\n " +
+                "Исполнитель: \n Филонов Всеволод Андреевич\n группа БПИ185");
+    }
 
+    /**
+     * Helper method. saves session to .ihr serialization file
+     * @param path path to file
+     * @return true in case of success
+     */
+    private boolean saveSession(String path) {
+        try { // open IO stream
+            BufferedImage toSave = SwingFXUtils.fromFXImage(view.getImage(), null);
+            ImageIO.write(toSave, "png", new File(path));
+            return true;    // return success
+        } catch (IOException ioex) {    // notify user in case of error
+            showAlertMessage("Error.", "Can't save file.");
+            return false;   // return failure
+        }
     }
 
 
