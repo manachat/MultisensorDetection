@@ -101,31 +101,31 @@
                         <VBox fx:id="vBoxT2" spacing="5.0">
                             <children>
                                 <Label prefWidth="200" text="B1" />
-                                <ComboBox fx:id="b1ComboBoxT2" />
+                                <ComboBox  />
                                 <Label text="B2" />
-                                <ComboBox fx:id="b2ComboBoxT2" />
+                                <ComboBox  />
                                 <Label text="B3" />
-                                <ComboBox fx:id="b3ComboBoxT2" />
+                                <ComboBox  />
                                 <Label text="B4" />
-                                <ComboBox fx:id="b4ComboBoxT2" />
+                                <ComboBox  />
                                 <Label text="B5" />
-                                <ComboBox fx:id="b5ComboBoxT2" />
+                                <ComboBox  />
                                 <Label text="B6" />
-                                <ComboBox fx:id="b6ComboBoxT2" />
+                                <ComboBox  />
                                 <Label text="B7" />
-                                <ComboBox fx:id="b7ComboBoxT2" />
+                                <ComboBox  />
                                 <Label text="B8" />
-                                <ComboBox fx:id="b8ComboBoxT2" />
+                                <ComboBox  />
                                 <Label text="B8A" />
-                                <ComboBox fx:id="b8aComboBoxT2" />
+                                <ComboBox  />
                                 <Label text="B9" />
-                                <ComboBox fx:id="b9ComboBoxT2" />
+                                <ComboBox  />
                                 <Label text="B10" />
-                                <ComboBox fx:id="b10ComboBoxT2" />
+                                <ComboBox  />
                                 <Label text="B11" />
-                                <ComboBox fx:id="b11ComboBoxT2" />
+                                <ComboBox  />
                                 <Label text="B12" />
-                                <ComboBox fx:id="b12ComboBoxT2" />
+                                <ComboBox  />
                             </children>
                         </VBox>
                     </content>
@@ -150,12 +150,12 @@
                     </center>
                 </BorderPane>
             <Separator prefWidth="200.0" />
-                <Button fx:id="renderRgbButton" alignment="CENTER" contentDisplay="CENTER" minHeight="10.0" onMouseClicked="#renderRGBClickHandler" text="Render RGB" textAlignment="CENTER">
+                <Button fx:id="renderRgbButton" alignment="CENTER" contentDisplay="CENTER" minHeight="10.0" onMouseClicked="#onRenderRGB" text="Render RGB" textAlignment="CENTER">
                     <VBox.margin>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                     </VBox.margin>
                 </Button>
-            <Button mnemonicParsing="false" onMouseClicked="#renderInfraredClickHandler" text="Render Infrared">
+            <Button mnemonicParsing="false" onMouseClicked="#onRenderInfrared" text="Render Infrared">
                <VBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </VBox.margin>

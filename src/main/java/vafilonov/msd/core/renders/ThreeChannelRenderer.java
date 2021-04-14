@@ -7,10 +7,28 @@ import static vafilonov.msd.core.sentinel2.utils.Constants.PIXEL_RESOLUTIONS;
 
 import java.nio.ShortBuffer;
 
+/**
+ * Basic class for 3-channel render in RGB-like manner.
+ */
 public abstract class ThreeChannelRenderer extends AbstractRender implements PixelAction<ShortBuffer[][], int[]> {
+
+    /**
+     * Channel statistics
+     */
     protected final double redMin, redMax, greenMin, greenMax, blueMin, blueMax;
+
+    /**
+     * index of rendered bands
+     */
     private final int redIndex, greenIndex, blueIndex;
 
+    /**
+     * Constructor.
+     * @param dataset dataset to render
+     * @param redIndex index for red channel
+     * @param greenIndex index for green channel
+     * @param blueIndex index for blue channel
+     */
     public ThreeChannelRenderer(RasterDataset dataset, int redIndex, int greenIndex, int blueIndex) {
         super(dataset);
 
@@ -65,6 +83,15 @@ public abstract class ThreeChannelRenderer extends AbstractRender implements Pix
         }
     }
 
+    /**
+     * Modifies pixel color during traversl
+     * @param i row index
+     * @param j column index
+     * @param colorValue initial color value
+     * @param values pixel values
+     * @param params additional parameters
+     * @return modified color
+     */
     protected int modifyPixel(int i, int j, int colorValue, ShortBuffer[][] values, int[] params) {
         return colorValue;
     }

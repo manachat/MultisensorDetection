@@ -23,10 +23,9 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         Properties prop = new Properties();
-        final String file = "app.config";
+        final String file = "appconfig.xml";
         try (var propStream = new FileInputStream(file)) {
             prop.loadFromXML(propStream);
-            System.out.println(SerializationHelper.SERIAL_VERSION_UID);
         } catch (IOException ioex) {
             System.err.println("Couldn't load configuration file.");
             System.exit(-1);

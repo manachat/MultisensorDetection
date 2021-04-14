@@ -1,9 +1,15 @@
 package vafilonov.msd.core;
 
-import weka.classifiers.Classifier;
-import weka.core.SerializationHelper;
-
+/**
+ * Classifier of pixel values
+ */
 public interface PixelClassifier {
+    /**
+     * pixel classification method
+     * @param featureValues features
+     * @return pixel class
+     */
     int classifyPixel(double[] featureValues);
+
 
 }

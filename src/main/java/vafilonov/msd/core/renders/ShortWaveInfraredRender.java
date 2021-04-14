@@ -1,9 +1,12 @@
 package vafilonov.msd.core.renders;
 
-import org.gdal.gdal.Band;
 import vafilonov.msd.core.RasterDataset;
 import vafilonov.msd.core.sentinel2.utils.Sentinel2Band;
 
+/**
+ * Render for short-wave infrared (SWIR) spectre.
+ * Utilizes B12, B8A and B4
+ */
 public class ShortWaveInfraredRender extends ThreeChannelRenderer{
 
     public ShortWaveInfraredRender(RasterDataset dataset) {

@@ -14,18 +14,33 @@ import static vafilonov.msd.core.sentinel2.utils.Resolution.res10M;
 import static vafilonov.msd.core.sentinel2.utils.Resolution.res60M;
 import static vafilonov.msd.core.sentinel2.utils.Resolution.res60m;
 
+/**
+ * Dataset implementation for Sentinel-2 imagery
+ */
 public class Sentinel2RasterDataset implements RasterDataset {
 
+    /**
+     * indices of bands with 10m resolution
+     */
     private static final int[] res10indices = {1, 2, 3, 7};
+
+    /**
+     * indices of bands with 20m resolution
+     */
     private static final int[] res20indices = {4, 5, 6, 8, 11, 12};
+
+    /**
+     * indices of bands with 60m resolution
+     */
     private static final int[] res60indices = {0, 9, 10};
 
 
     /**
-     * Фабричный метод.
-     * Загружает растры и проверяет валидность.
-     * @param bandPaths путь к файлам с растрами в обозначенном порядке
-     * @return экземпляр класса
+     * Fabric method.
+     * Loads datasets and validates them.
+     * @param bandPaths path to band files in order
+     * @return dataset instance
+     * @throws IllegalArgumentException invalid band number, resolution or alignment
      */
     public static Sentinel2RasterDataset loadDataset(String[] bandPaths) {
         if (bandPaths.length != BANDS_NUM) {
@@ -77,9 +92,10 @@ public class Sentinel2RasterDataset implements RasterDataset {
     }
 
     /**
-     * Проверяет выравнивание каналов разных разрешений.
-     * @param bands каналы
-     * @param geoTransforms
+     * Checks band alignment of different resolutions
+     * @param bands bands
+     * @param geoTransforms geo transformations
+     * @throws IllegalArgumentException in case rasters not aligned
      */
     private static void checkAlignment(Band[] bands, double[][] geoTransforms) {
         int lastX = -1;
@@ -128,9 +144,9 @@ public class Sentinel2RasterDataset implements RasterDataset {
     private boolean                  disposed;
 
     /**
-     * Конструктор
-     * @param bands каналы
-     * @param geoTransforms геотрансформации каналов
+     * Constructor
+     * @param bands bands
+     * @param geoTransforms bands' geo transformations
      */
     private Sentinel2RasterDataset(Band[] bands, double[][] geoTransforms) {
         this.bands = bands;
@@ -143,10 +159,6 @@ public class Sentinel2RasterDataset implements RasterDataset {
         return disposed;
     }
 
-    /**
-     * Очищает ресурсы асоциированных датасетов.
-     * После вызова метода датасет не должен использоватся, иначе поведение неопределено.
-     */
     @Override
     public void delete() {
         for (var b : bands) {
@@ -161,15 +173,7 @@ public class Sentinel2RasterDataset implements RasterDataset {
         return bands;
     }
 
-    public double[][] getGeoTransforms() {
-        return geoTransforms;
-    }
 
-    /**
-     * Вычисляет значения смещений для данного датасета
-     * @return массив из 8 элементов со смещениями [ширина, длина, 6 значений смещений]
-     * @throws IllegalStateException если каналов для расчета смещений недостаточно
-     */
     @Override
     public int[] computeOffsets() {
         int idx10 = -1;
@@ -214,12 +218,12 @@ public class Sentinel2RasterDataset implements RasterDataset {
     }
 
     /**
-     * Вычисляет смещения в метрах для всех трех разрешений каналов.
-     * @param band10idx индекс канала с разрешением 10м
-     * @param band20idx индекс канала с разрешением 20м
-     * @param band60idx индекс канала с разрешением 60м
-     * @return массив из 8 элементов: [ширина, высота, 6 значений смещений]
-     * @throws IllegalArgumentException - если канал одного из индексов отсутствует
+     * Calculates offsets in meters for all 3 resolutions
+     * @param band10idx band index with 10m resolution
+     * @param band20idx band index with 20m resolution
+     * @param band60idx band index with 60m resolution
+     * @return 8 elements array: [width, height, 6 values with offsets]
+     * @throws IllegalArgumentException - lacks one of bands
      */
     private int[] compute3ResOffsets(int band10idx, int band20idx, int band60idx) {
         if (bands[band10idx] == null || bands[band20idx] == null || bands[band60idx] == null) {
@@ -282,11 +286,11 @@ public class Sentinel2RasterDataset implements RasterDataset {
     }
 
     /**
-     * Вычисляет смещения в метрах для разрешений 10 и 20 м.
-     * @param band10idx индекс канала с разрешением 10м
-     * @param band20idx индекс канала с разрешением 20м
-     * @return массив из 8 элементов: [ширина, высота, 6 значений смещений], смещения 60м устанавливаются в 0
-     * @throws IllegalArgumentException - если канал одного из индексов отсутствует
+     * Calculates offsets in meters for 10m and 20m resolutions
+     * @param band10idx band index with 10m resolution
+     * @param band20idx band index with 20m resolution
+     * @return 8 elements array: [width, height, 6 values with offsets] 60m alignments are 0
+     * @throws IllegalArgumentException - lacks one of bands
      */
     private int[] computeOffsets10and20(int band10idx, int band20idx) {
         if (bands[band10idx] == null || bands[band20idx] == null) {
@@ -331,11 +335,11 @@ public class Sentinel2RasterDataset implements RasterDataset {
     }
 
     /**
-     * Вычисляет смещения в метрах для разрешений 10 и 60 м.
-     * @param band10idx индекс канала с разрешением 10м
-     * @param band60idx индекс канала с разрешением 60м
-     * @return массив из 8 элементов: [ширина, высота, 6 значений смещений], смещения 20м устанавливаются в 0
-     * @throws IllegalArgumentException - если канал одного из индексов отсутствует
+     * Calculates offsets in meters for 10m and 60m resolutions
+     * @param band10idx band index with 10m resolution
+     * @param band60idx band index with 60m resolution
+     * @return 8 elements array: [width, height, 6 values with offsets] 20m alignments are 0
+     * @throws IllegalArgumentException - lacks one of bands
      */
     private int[] computeOffsets10and60(int band10idx, int band60idx) {
         if (bands[band10idx] == null || bands[band60idx] == null) {

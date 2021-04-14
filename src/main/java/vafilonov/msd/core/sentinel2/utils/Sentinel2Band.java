@@ -1,5 +1,8 @@
 package vafilonov.msd.core.sentinel2.utils;
 
+/**
+ * Enumeration of Sentinel-2 bands
+ */
 public enum Sentinel2Band {
     B1,
     B2,

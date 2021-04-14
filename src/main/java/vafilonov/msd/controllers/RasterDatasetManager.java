@@ -10,7 +10,7 @@ public class RasterDatasetManager {
     List<RasterDataset> sets = new ArrayList<>();
 
     public RasterDataset gatherDataset() {
-
+        return null; //TODO pizda
     }
 
     public void deleteSet(RasterDataset set) {
