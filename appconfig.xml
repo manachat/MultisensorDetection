@@ -1,0 +1,7 @@
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <entry key="WORKDIR">/home/vfilonov/programming/geodata/test/</entry>
+    <entry key="PRESENT_CLASSIFIER">/home/vfilonov/programming/java/MultisensorDetection/src/main/resources/models/svm_full20_arif.model</entry>
+    <entry key="PAST_CLASSIFIER">/home/vfilonov/programming/java/MultisensorDetection/src/main/resources/models/svm_full15_arif.model</entry>
+    <entry key="FULL_CLASSIFIER">/home/vfilonov/programming/java/MultisensorDetection/src/main/resources/models/svm_fullset_arif.model</entry>
+</properties>

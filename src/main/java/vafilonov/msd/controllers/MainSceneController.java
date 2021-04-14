@@ -3,6 +3,7 @@ package vafilonov.msd.controllers;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
@@ -13,21 +14,44 @@ import javafx.scene.image.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import vafilonov.msd.Main;
-import vafilonov.msd.utils.Constants;
-import vafilonov.msd.utils.Renderer;
+import vafilonov.msd.core.PixelClassifier;
+import vafilonov.msd.core.RasterDataset;
+import vafilonov.msd.core.renders.*;
+import vafilonov.msd.core.sentinel2.Sentinel2PixelClassifier;
+import vafilonov.msd.core.sentinel2.Sentinel2RasterDataset;
+import vafilonov.msd.core.RasterTraverser;
+import vafilonov.msd.core.sentinel2.utils.Constants;
+import vafilonov.msd.core.sentinel2.utils.Sentinel2Band;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Properties;
 
 
 public class MainSceneController {
 
     private static final int MENU_BAR_PREF_HEIGHT = 25;
 
-    private Path outputDatasetFilePath = null;
+    private Stage stage;
+
+    private Scene scene;
+
+    private Properties config;
+
+    private RGBRender rgbCache;
+
+    private InfraRender infraCache;
+
+    private ShortWaveInfraredRender shortWaveCache;
+
+    private AgricultureRender agricultureCache;
+
+    private GeologyRenderer geologyCache;
+
+    private ClassifierRender classifierCache;
 
     @FXML
     private VBox toolsVBox;
@@ -58,48 +82,6 @@ public class MainSceneController {
     @FXML
     private VBox vBoxT1;
 
-    @FXML
-    private Button fileChooseT1;
-
-    @FXML
-    private ComboBox<File> b1ComboBoxT1;
-
-    @FXML
-    private ComboBox<File> b2ComboBoxT1;
-
-    @FXML
-    private ComboBox<File> b3ComboBoxT1;
-
-    @FXML
-    private ComboBox<File> b4ComboBoxT1;
-
-    @FXML
-    private ComboBox<File> b5ComboBoxT1;
-
-    @FXML
-    private ComboBox<File> b6ComboBoxT1;
-
-    @FXML
-    private ComboBox<File> b7ComboBoxT1;
-
-    @FXML
-    private ComboBox<File> b8ComboBoxT1;
-
-    @FXML
-    private ComboBox<File> b8aComboBoxT1;
-
-    @FXML
-    private ComboBox<File> b9ComboBoxT1;
-
-    @FXML
-    private ComboBox<File> b10ComboBoxT1;
-
-    @FXML
-    private ComboBox<File> b11ComboBoxT1;
-
-    @FXML
-    private ComboBox<File> b12ComboBoxT1;
-
     private final ArrayList<ComboBox<File>> t1Boxes = new ArrayList<>(13);
 
 
@@ -108,70 +90,28 @@ public class MainSceneController {
     @FXML
     private VBox vBoxT2;
 
-    @FXML
-    private Button fileChooseT2;
-
-    @FXML
-    private ComboBox<File> b1ComboBoxT2;
-
-    @FXML
-    private ComboBox<File> b2ComboBoxT2;
-
-    @FXML
-    private ComboBox<File> b3ComboBoxT2;
-
-    @FXML
-    private ComboBox<File> b4ComboBoxT2;
-
-    @FXML
-    private ComboBox<File> b5ComboBoxT2;
-
-    @FXML
-    private ComboBox<File> b6ComboBoxT2;
-
-    @FXML
-    private ComboBox<File> b7ComboBoxT2;
-
-    @FXML
-    private ComboBox<File> b8ComboBoxT2;
-
-    @FXML
-    private ComboBox<File> b8aComboBoxT2;
-
-    @FXML
-    private ComboBox<File> b9ComboBoxT2;
-
-    @FXML
-    private ComboBox<File> b10ComboBoxT2;
-
-    @FXML
-    private ComboBox<File> b11ComboBoxT2;
-
-    @FXML
-    private ComboBox<File> b12ComboBoxT2;
-
     private final ArrayList<ComboBox<File>> t2Boxes = new ArrayList<>(13);
 
 
     @FXML
     public void initialize() {
         initializeComboBoxes();
+
     }
 
-    public void postInitialize() {
+    public void postInitialize(Stage stage, Properties props) {
+        this.stage = stage;
+        config = props;
+        scene = stage.getScene();
 
-        Main.scene.widthProperty().addListener(value -> {
-
-            view.setFitWidth(Main.scene.getWidth() - filesVBox.getPrefWidth() - toolsVBox.getPrefWidth());
+        scene.widthProperty().addListener(value -> {
+            view.setFitWidth(scene.getWidth() - filesVBox.getPrefWidth() - toolsVBox.getPrefWidth());
         });
 
-        //filesVBox.prefHeightProperty().bind(Main.scene.heightProperty());
-        //toolsVBox.prefHeightProperty().bind(Main.scene.heightProperty());
-
-        Main.scene.heightProperty().addListener(value -> {
-            view.setFitHeight(Main.scene.getHeight() - MENU_BAR_PREF_HEIGHT);
-            filesVBox.setPrefHeight(Main.scene.getHeight() - MENU_BAR_PREF_HEIGHT-10);
-            toolsVBox.setPrefHeight(Main.scene.getHeight() - MENU_BAR_PREF_HEIGHT-10);
+        scene.heightProperty().addListener(value -> {
+            view.setFitHeight(scene.getHeight() - MENU_BAR_PREF_HEIGHT);
+            filesVBox.setPrefHeight(scene.getHeight() - MENU_BAR_PREF_HEIGHT-10);
+            toolsVBox.setPrefHeight(scene.getHeight() - MENU_BAR_PREF_HEIGHT-10);
         });
     }
 
@@ -229,17 +169,27 @@ public class MainSceneController {
         chooseFilesForBoxes(t2Boxes);
     }
 
+    private void clearCache() {
+        rgbCache = null;
+        infraCache = null;
+        agricultureCache = null;
+        geologyCache = null;
+        shortWaveCache = null;
+        classifierCache = null;
+    }
+
     private void chooseFilesForBoxes(ArrayList<ComboBox<File>> boxes) {
         final FileChooser chooser = new FileChooser();
+        chooser.setInitialDirectory(new File(config.getProperty("WORKDIR")));
         chooser.setTitle("Choose files");
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Satellite-2 data (*.tif, *.jp2)", "*.jp2", "*.tif"));
-        //chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Satellite-2 data: ", "*.jp2", "*.tif"));
 
-        var files = chooser.showOpenMultipleDialog(Main.stage);
+        var files = chooser.showOpenMultipleDialog(stage);
 
         if (files == null) {
             return;
         }
+        clearCache();
 
         for (int i = 0; i < boxes.size(); i++) {
             ComboBox<File> cb = boxes.get(i);
@@ -252,107 +202,179 @@ public class MainSceneController {
         }
     }
 
-
-    @FXML
-    private void renderRGBClickHandler(MouseEvent e) throws Exception {
-        if (t1Boxes.get(Constants.Bands.B2.ordinal()).getValue() == null ||
-                t1Boxes.get(Constants.Bands.B3.ordinal()).getValue() == null ||
-                t1Boxes.get(Constants.Bands.B4.ordinal()).getValue() == null) {
-            showAlertMessage("Error", "RGB bands (2,3,4) not set.");
-            return;
-        }
-
-        String blue = t1Boxes.get(Constants.Bands.B2.ordinal()).getValue().getPath();
-        String green = t1Boxes.get(Constants.Bands.B3.ordinal()).getValue().getPath();
-        String red = t1Boxes.get(Constants.Bands.B4.ordinal()).getValue().getPath();
-
-        final int[] pixels = Renderer.renderRGBLike(red, green, blue);
-        if (pixels == null)
-            return;
-        // width and height
-        int x = pixels[0];
-        int y = pixels[1];
-
-        WritableImage img = new WritableImage(x, y);
-        PixelWriter writer = img.getPixelWriter();
-        writer.setPixels(0, 0, x, y, PixelFormat.getIntArgbInstance(), pixels, 2, x);
-        view.setImage(img);
-        view.setViewport(new Rectangle2D(0, 0, x, y));
-
-        Runtime.getRuntime().gc();
-
+    private Sentinel2RasterDataset createPresentDataset() {
+        return createDataset(t1Boxes);
     }
 
-    @FXML
-    private void renderInfraredClickHandler(MouseEvent e) {
-        if (t1Boxes.get(Constants.Bands.B8.ordinal()).getValue() == null ||
-                t1Boxes.get(Constants.Bands.B3.ordinal()).getValue() == null ||
-                t1Boxes.get(Constants.Bands.B4.ordinal()).getValue() == null) {
-            showAlertMessage("Error", "RGB bands (2,3,4) not set.");
-            return;
-        }
-
-        String blue = t1Boxes.get(Constants.Bands.B3.ordinal()).getValue().getPath();
-        String green = t1Boxes.get(Constants.Bands.B4.ordinal()).getValue().getPath();
-        String red = t1Boxes.get(Constants.Bands.B8.ordinal()).getValue().getPath();
-
-        final int[] pixels = Renderer.renderRGBLike(red, green, blue);
-        if (pixels == null)
-            return;
-        // width and height
-        int x = pixels[0];
-        int y = pixels[1];
-
-        WritableImage img = new WritableImage(x, y);
-        PixelWriter writer = img.getPixelWriter();
-        writer.setPixels(0, 0, x, y, PixelFormat.getIntArgbInstance(), pixels, 2, x);
-        view.setImage(img);
-        view.setViewport(new Rectangle2D(0, 0, x, y));
+    private Sentinel2RasterDataset createPastDataset() {
+        return createDataset(t2Boxes);
     }
 
-    @FXML
-    private void chooseDatasetFileClickHandler(MouseEvent e) {
-        final FileChooser chooser = new FileChooser();
-        chooser.setTitle("Choose output file");
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Dataset file(.csv)", "*.csv"));
-        var res = chooser.showSaveDialog(Main.stage);
-        Path path = Paths.get(res.getAbsolutePath() + ".csv");
-        String simpleName = path.getFileName().toString();
-        outputDatasetFilePath = path;
-        outputDatasetButton.setText(simpleName);
-    }
+    private Sentinel2RasterDataset createDataset(ArrayList<ComboBox<File>> comboBoxes) {
 
-    @FXML
-    private void createDatasetClickHandler(MouseEvent e) {
-        if (outputDatasetFilePath == null) {
-            showAlertMessage("Error", "Output file not set.");
-            return;
-        }
-
-        int mark = -1;
-        if (classMarkTextField.getText() == null || classMarkTextField.getText().isBlank()) {
-            showAlertMessage("Error", "Class mark not set.");
-            return;
-        }
-
-        try {
-            mark = Integer.parseInt(classMarkTextField.getText());
-        } catch (NumberFormatException numEx) {
-            showAlertMessage("Error", "Invalid integer format");
-            return;
-        }
-
-        String[] paths = new String[t1Boxes.size()];
+        String[] paths = new String[Constants.BANDS_NUM];
         int i = 0;
-        for (var box : t1Boxes) {
-            if (box == null || box.getValue() == null) {
-                showAlertMessage("Error", "Not all bands present.");
+        for (ComboBox<File> b : comboBoxes) {
+            if (b.getValue() != null)
+                paths[i++] = b.getValue().getPath();
+            else
+                paths[i++] = null;
+        }
+
+        return Sentinel2RasterDataset.loadDataset(paths);
+    }
+
+    private void setRenderView(AbstractRender render) {
+        final int[] pixels = render.getRaster();
+        if (pixels == null)
+            return;
+
+        // width and height
+        int x = render.getRasterWidth();
+        int y = render.getRasterHeight();
+
+        WritableImage img = new WritableImage(x, y);
+        PixelWriter writer = img.getPixelWriter();
+        writer.setPixels(0, 0, x, y, PixelFormat.getIntArgbInstance(), pixels, 0, x);
+        view.setImage(img);
+        view.setViewport(new Rectangle2D(0, 0, x, y));
+    }
+
+
+    @FXML
+    private void onRenderRGB(MouseEvent e) {
+        if (t1Boxes.get(Sentinel2Band.B4.ordinal()).getValue() == null ||
+                t1Boxes.get(Sentinel2Band.B3.ordinal()).getValue() == null ||
+                t1Boxes.get(Sentinel2Band.B2.ordinal()).getValue() == null) {
+            showAlertMessage("Error", "RGB bands (2,3,4) not set.");
+            return;
+        }
+
+        if (rgbCache == null) {
+            RasterDataset presentSet = createPresentDataset();
+            RGBRender renderer = new RGBRender(presentSet);
+            RasterTraverser.traverseRaster(renderer, new RasterDataset[]{presentSet}, renderer.getTraverseMask());
+            presentSet.delete();
+            rgbCache = renderer;
+        }
+
+        setRenderView(rgbCache);
+    }
+
+    @FXML
+    private void onRenderInfrared(MouseEvent e) {
+        if (t1Boxes.get(Sentinel2Band.B8.ordinal()).getValue() == null ||
+                t1Boxes.get(Sentinel2Band.B4.ordinal()).getValue() == null ||
+                t1Boxes.get(Sentinel2Band.B3.ordinal()).getValue() == null) {
+            showAlertMessage("Error", "Infrared bands (8,4,3) not set.");
+            return;
+        }
+
+        if (infraCache == null) {
+            RasterDataset presentSet = createPresentDataset();
+            InfraRender render = new InfraRender(presentSet);
+            RasterTraverser.traverseRaster(render, new RasterDataset[]{presentSet}, render.getTraverseMask());
+            presentSet.delete();
+            infraCache = render;
+        }
+        setRenderView(infraCache);
+    }
+
+    @FXML
+    private void onRenderShortWave(MouseEvent e) {
+        if (t1Boxes.get(Sentinel2Band.B12.ordinal()).getValue() == null ||
+                t1Boxes.get(Sentinel2Band.B8A.ordinal()).getValue() == null ||
+                t1Boxes.get(Sentinel2Band.B4.ordinal()).getValue() == null) {
+            showAlertMessage("Error", "Short Wave Infrared bands (12,8A,4) not set.");
+            return;
+        }
+
+        if (shortWaveCache == null) {
+            RasterDataset presentSet = createPresentDataset();
+            ShortWaveInfraredRender render = new ShortWaveInfraredRender(presentSet);
+            RasterTraverser.traverseRaster(render, new RasterDataset[]{presentSet}, render.getTraverseMask());
+            presentSet.delete();
+            shortWaveCache = render;
+        }
+        setRenderView(shortWaveCache);
+    }
+
+    @FXML
+    private void onRenderAgriculture(MouseEvent e) {
+        if (t1Boxes.get(Sentinel2Band.B11.ordinal()).getValue() == null ||
+                t1Boxes.get(Sentinel2Band.B8.ordinal()).getValue() == null ||
+                t1Boxes.get(Sentinel2Band.B2.ordinal()).getValue() == null) {
+            showAlertMessage("Error", "Agriculture bands (11,8,2) not set.");
+            return;
+        }
+
+        if (agricultureCache == null) {
+            RasterDataset presentSet = createPresentDataset();
+            AgricultureRender render = new AgricultureRender(presentSet);
+            RasterTraverser.traverseRaster(render, new RasterDataset[]{presentSet}, render.getTraverseMask());
+            presentSet.delete();
+            agricultureCache = render;
+        }
+        setRenderView(agricultureCache);
+    }
+
+    @FXML
+    private void onRenderGeology(MouseEvent e) {
+        if (t1Boxes.get(Sentinel2Band.B12.ordinal()).getValue() == null ||
+                t1Boxes.get(Sentinel2Band.B11.ordinal()).getValue() == null ||
+                t1Boxes.get(Sentinel2Band.B2.ordinal()).getValue() == null) {
+            showAlertMessage("Error", "Geology bands (12,11,2) not set.");
+            return;
+        }
+
+        if (geologyCache == null) {
+            RasterDataset presentSet = createPresentDataset();
+            GeologyRenderer render = new GeologyRenderer(presentSet);
+            RasterTraverser.traverseRaster(render, new RasterDataset[]{presentSet}, render.getTraverseMask());
+            presentSet.delete();
+            geologyCache = render;
+        }
+        setRenderView(geologyCache);
+    }
+
+    @FXML
+    private void onClassify(MouseEvent e) {
+        if (classifierCache == null) {
+            PixelClassifier classifier;
+            try {
+                classifier = Sentinel2PixelClassifier.loadClassifier(config.getProperty("FULL_CLASSIFIER"));
+            } catch (Exception ex) {
+                showAlertMessage("Error", "Could not load classifier.");
                 return;
             }
-            paths[i++] = box.getValue().getPath();
-        }
 
-        Renderer.createDataset(mark, outputDatasetFilePath.toString(), paths);// TODO remove
+            RasterDataset presetSet = createPresentDataset();
+            RasterDataset pastSet = createPastDataset();
+
+            for (var band : presetSet.getBands()) {
+                if (band == null) {
+                    showAlertMessage("Error", "Not all bands are present in present set" );
+                    presetSet.delete();
+                    pastSet.delete();
+                    return;
+                }
+            }
+            for (var band : pastSet.getBands()) {
+                if (band == null) {
+                    showAlertMessage("Error", "Not all bands are present in past set" );
+                    presetSet.delete();
+                    pastSet.delete();
+                    return;
+                }
+            }
+
+            ClassifierRender render = new ClassifierRender(presetSet, classifier);
+            RasterTraverser.traverseRaster(render, new RasterDataset[]{presetSet, pastSet}, render.getTraverseMask());
+            presetSet.delete();
+            pastSet.delete();
+            classifierCache = render;
+        }
+        setRenderView(classifierCache);
     }
 
 
@@ -395,41 +417,5 @@ public class MainSceneController {
         msg.show();
     }
 
-    @FXML
-    private void classify(MouseEvent e) throws Exception {
-        String[] paths1 = new String[t1Boxes.size()];
-        String[] paths2 = new String[t2Boxes.size()];
-        int i = 0;
-        for (var box : t1Boxes) {
-            if (box == null || box.getValue() == null) {
-                showAlertMessage("Error", "Not all bands present.");
-                return;
-            }
-            paths1[i++] = box.getValue().getPath();
-        }
-        i = 0;
-        for (var box : t2Boxes) {
-            if (box == null || box.getValue() == null) {
-                showAlertMessage("Error", "Not all bands present.");
-                return;
-            }
-            paths2[i++] = box.getValue().getPath();
-        }
-
-        int[] pixels = Renderer.classifier(paths1, paths2);
-
-        if (pixels == null)
-            return;
-        // width and height
-        int x = pixels[0];
-        int y = pixels[1];
-
-        WritableImage img = new WritableImage(x, y);
-        PixelWriter writer = img.getPixelWriter();
-        writer.setPixels(0, 0, x, y, PixelFormat.getIntArgbInstance(), pixels, 2, x);
-        view.setImage(img);
-        view.setViewport(new Rectangle2D(0, 0, x, y));
-
-    }
 
 }
