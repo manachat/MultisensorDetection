@@ -6,7 +6,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import vafilonov.msd.controllers.MainSceneController;
-import weka.core.SerializationHelper;
 
 import java.awt.Toolkit;
 import java.awt.Dimension;
@@ -37,7 +36,7 @@ public class Main extends Application {
         loader.setLocation(getClass().getResource("/fxml/MainScene.fxml"));
         Parent root = loader.load();
 
-        Scene scene = new Scene(root, screenSize.getWidth(), screenSize.getHeight());
+        Scene scene = new Scene(root, screenSize.getWidth() / 2, screenSize.getHeight() / 2);
         stage.setScene(scene);
 
         MainSceneController controller = loader.getController();

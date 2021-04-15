@@ -4,4 +4,5 @@
     <entry key="PRESENT_CLASSIFIER">/home/vfilonov/programming/java/MultisensorDetection/src/main/resources/models/svm_full20_arif.model</entry>
     <entry key="PAST_CLASSIFIER">/home/vfilonov/programming/java/MultisensorDetection/src/main/resources/models/svm_full15_arif.model</entry>
     <entry key="FULL_CLASSIFIER">/home/vfilonov/programming/java/MultisensorDetection/src/main/resources/models/svm_fullset_arif.model</entry>
+    <entry key="COLORMAP">/home/vfilonov/Downloads/Colormap.png</entry>
 </properties>

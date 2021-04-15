@@ -57,7 +57,7 @@ public class ClassifierRender extends RGBRender {
         if (pastClass == presentClass){
             return -1;
         } else {
-            return (255 << 24) | map[pastClass][presentClass].getRGB() ; //TODO переделать
+            return (255 << 24) | map[pastClass][presentClass].getRGB() ;
         }
 
     }
@@ -66,11 +66,11 @@ public class ClassifierRender extends RGBRender {
      * Color map for pixel change
      */
     private static Color[][] map ={
-            {    null, new Color(0x93F1B9), new Color(0x9E9ED0), new Color(0x0C7D77), new Color(0x698D1B) },
-            {new Color(0x86A8EC),      null, new Color(0xE85F9F), new Color(0x149714), new Color(0xBDBD37)},
-            {new Color(0x6B9CF5), new Color(0x65E00F), null, new Color(0x00781E), new Color(0x787878)},
-            {new Color(0x2B6DEF), new Color(0x929528), new Color(0xE72727),     null, new Color(0xFAFA3F)},
-            {new Color(0x0909EA), new Color(0xA5F56D), new Color(0x7B237B), new Color(0x567160),  null}
+            {    null, new Color(0x93F1B9), new Color(0xFFCCCC), new Color(0x0C7D77), new Color(0xFFFFCC) },
+            {new Color(0x86A8EC),      null, new Color(0xE85F9F), new Color(0x149714), new Color(0xFFFF99)},
+            {new Color(0x6B9CF5), new Color(0x65E00F), null, new Color(0x008A22), new Color(0xFFFF33)},
+            {new Color(0x2B6DEF), new Color(0x7ACC29), new Color(0xE72727),     null, new Color(0xCCCC00)},
+            {new Color(0x0909EA), new Color(0xA5F56D), new Color(0x660000), new Color(0x003300),  null}
     };
 
 }

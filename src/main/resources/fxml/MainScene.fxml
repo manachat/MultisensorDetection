@@ -12,15 +12,15 @@
             <menus>
                 <Menu mnemonicParsing="false" text="File">
                     <items>
-                        <MenuItem fx:id="saveMenu" mnemonicParsing="false" onAction="#saveMenuHandler" text="Save" />
-                        <MenuItem fx:id="saveAsMenu" mnemonicParsing="false" onAction="#saveAsMenuHandler" text="Save as..." />
-                        <MenuItem fx:id="loadMenu" mnemonicParsing="false" onAction="#loadMenuHandler" text="Load" />
+                        <MenuItem mnemonicParsing="false" onAction="#saveMenuHandler" text="Save" />
+                        <MenuItem mnemonicParsing="false" onAction="#saveAsMenuHandler" text="Save as..." />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Help">
                     <items>
-                        <MenuItem fx:id="infoMenu" mnemonicParsing="false" onAction="#infoMenuHandler" text="Справка" />
-                        <MenuItem fx:id="aboutMenu" mnemonicParsing="false" onAction="#aboutMenuHandler" text="О разработчике" />
+                        <MenuItem mnemonicParsing="false" onAction="#colormapMenuHandler" text="Цветовая схема" />
+                        <MenuItem mnemonicParsing="false" onAction="#infoMenuHandler" text="Справка" />
+                        <MenuItem mnemonicParsing="false" onAction="#aboutMenuHandler" text="О разработчике" />
                     </items>
                 </Menu>
             </menus>
@@ -32,7 +32,7 @@
             <children>
                 <HBox>
                     <children>
-                        <Label alignment="CENTER" text="Period 1:">
+                        <Label alignment="CENTER" text="Present:">
                             <HBox.margin>
                                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                             </HBox.margin>
@@ -46,7 +46,7 @@
                 </HBox>
                 <ScrollPane minHeight="200" minWidth="200.0">
                     <content>
-                        <VBox fx:id="vBoxT1" spacing="5.0">
+                        <VBox fx:id="vBoxPresent" spacing="5.0">
                             <children>
                                 <Label prefWidth="200" text="B1">
                                     <VBox.margin>
@@ -55,36 +55,36 @@
                                 </Label>
                                 <ComboBox prefHeight="10" />
                                 <Label text="B2" />
-                                <ComboBox  />
+                                <ComboBox />
                                 <Label text="B3" />
-                                <ComboBox  />
+                                <ComboBox />
                                 <Label text="B4" />
-                                <ComboBox  />
+                                <ComboBox />
                                 <Label text="B5" />
-                                <ComboBox  />
+                                <ComboBox />
                                 <Label text="B6" />
-                                <ComboBox  />
+                                <ComboBox />
                                 <Label text="B7" />
-                                <ComboBox  />
+                                <ComboBox />
                                 <Label text="B8" />
-                                <ComboBox  />
+                                <ComboBox />
                                 <Label text="B8A" />
-                                <ComboBox  />
+                                <ComboBox />
                                 <Label text="B9" />
-                                <ComboBox  />
+                                <ComboBox />
                                 <Label text="B10" />
-                                <ComboBox  />
+                                <ComboBox />
                                 <Label text="B11" />
-                                <ComboBox  />
+                                <ComboBox />
                                 <Label text="B12" />
-                                <ComboBox  />
+                                <ComboBox />
                             </children>
                         </VBox>
                     </content>
                 </ScrollPane>
                 <HBox>
                     <children>
-                        <Label alignment="CENTER" text="Period 2:">
+                        <Label alignment="CENTER" text="Past:">
                             <HBox.margin>
                                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                             </HBox.margin>
@@ -98,34 +98,34 @@
                 </HBox>
                 <ScrollPane minHeight="200" minWidth="200.0">
                     <content>
-                        <VBox fx:id="vBoxT2" spacing="5.0">
+                        <VBox fx:id="vBoxPast" spacing="5.0">
                             <children>
                                 <Label prefWidth="200" text="B1" />
-                                <ComboBox  />
+                                <ComboBox />
                                 <Label text="B2" />
-                                <ComboBox  />
+                                <ComboBox />
                                 <Label text="B3" />
-                                <ComboBox  />
+                                <ComboBox />
                                 <Label text="B4" />
-                                <ComboBox  />
+                                <ComboBox />
                                 <Label text="B5" />
-                                <ComboBox  />
+                                <ComboBox />
                                 <Label text="B6" />
-                                <ComboBox  />
+                                <ComboBox />
                                 <Label text="B7" />
-                                <ComboBox  />
+                                <ComboBox />
                                 <Label text="B8" />
-                                <ComboBox  />
+                                <ComboBox />
                                 <Label text="B8A" />
-                                <ComboBox  />
+                                <ComboBox />
                                 <Label text="B9" />
-                                <ComboBox  />
+                                <ComboBox />
                                 <Label text="B10" />
-                                <ComboBox  />
+                                <ComboBox />
                                 <Label text="B11" />
-                                <ComboBox  />
+                                <ComboBox />
                                 <Label text="B12" />
-                                <ComboBox  />
+                                <ComboBox />
                             </children>
                         </VBox>
                     </content>
@@ -150,7 +150,7 @@
                     </center>
                 </BorderPane>
             <Separator prefWidth="200.0" />
-                <Button fx:id="renderRgbButton" alignment="CENTER" contentDisplay="CENTER" minHeight="10.0" onMouseClicked="#onRenderRGB" text="Render RGB" textAlignment="CENTER">
+                <Button alignment="CENTER" contentDisplay="CENTER" minHeight="10.0" onMouseClicked="#onRenderRGB" text="Render RGB" textAlignment="CENTER">
                     <VBox.margin>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                     </VBox.margin>
@@ -160,18 +160,41 @@
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </VBox.margin>
             </Button>
+                <Button alignment="CENTER" contentDisplay="CENTER" minHeight="10.0" onMouseClicked="#onRenderShortWave" text="Render SWIR" textAlignment="CENTER">
+                    <VBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                    </VBox.margin>
+                </Button>
+                <Button alignment="CENTER" contentDisplay="CENTER" minHeight="10.0" onMouseClicked="#onRenderAgriculture" text="Render Agriculture" textAlignment="CENTER">
+                    <VBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                    </VBox.margin>
+                </Button>
+                <Button alignment="CENTER" contentDisplay="CENTER" minHeight="10.0" onMouseClicked="#onRenderGeology" text="Render Geology" textAlignment="CENTER">
+                    <VBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                    </VBox.margin>
+                </Button>
                 <Separator prefWidth="200.0">
                     <VBox.margin>
                         <Insets bottom="5.0" top="5.0" />
                     </VBox.margin>
                 </Separator>
-            <Button mnemonicParsing="false" text="Button" onMouseClicked="#classify"/>
+            <Button alignment="CENTER" contentDisplay="CENTER" minHeight="10.0" onMouseClicked="#onClassify" text="Detect changes" textAlignment="CENTER">
+                <VBox.margin>
+                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                </VBox.margin>
+            </Button>
             </children>
         </VBox>
     </right>
     <center>
-
-        <ImageView fx:id="view" fitHeight="60" fitWidth="600" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER" />
+        <BorderPane fx:id="viewBox">
+            
+            <center>
+                <ImageView fx:id="view" fitHeight="60" fitWidth="600" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER" />
+            </center>
+        </BorderPane>
     </center>
    <opaqueInsets>
       <Insets />
