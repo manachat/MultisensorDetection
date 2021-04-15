@@ -18,8 +18,9 @@
                 </Menu>
                 <Menu mnemonicParsing="false" text="Help">
                     <items>
-                        <MenuItem fx:id="infoMenu" mnemonicParsing="false" onAction="#infoMenuHandler" text="Справка" />
-                        <MenuItem fx:id="aboutMenu" mnemonicParsing="false" onAction="#aboutMenuHandler" text="О разработчике" />
+                        <MenuItem mnemonicParsing="false" onAction="#colormapMenuHandler" text="Цветовая схема" />
+                        <MenuItem mnemonicParsing="false" onAction="#infoMenuHandler" text="Справка" />
+                        <MenuItem mnemonicParsing="false" onAction="#aboutMenuHandler" text="О разработчике" />
                     </items>
                 </Menu>
             </menus>
@@ -188,7 +189,7 @@
         </VBox>
     </right>
     <center>
-        <BorderPane fx:id="viewBox" style="-fx-background-color: red;">
+        <BorderPane fx:id="viewBox">
             
             <center>
                 <ImageView fx:id="view" fitHeight="60" fitWidth="600" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER" />

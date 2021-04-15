@@ -16,7 +16,6 @@ public abstract class AbstractRender {
      */
     public AbstractRender(RasterDataset set) {
         int[] offs = set.computeOffsets();
-        System.out.println(Arrays.toString(offs));
         int width = offs[0];
         int height = offs[1];
         int rasterWidth = width / 10;

@@ -2,6 +2,7 @@ package vafilonov.msd.controllers;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
@@ -12,6 +13,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.image.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -30,6 +32,8 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -466,7 +470,17 @@ public class MainSceneController {
 
     @FXML
     private void infoMenuHandler(ActionEvent event) {
-
+        showAlertMessage("Help",
+                "Present: даанные за текущий (или более поздний) период.\n " +
+                        "Past: данные за прошлый (или более ранний) период.\n" +
+                        "Render RGB: отрисовка изображения в видимом спектре\n" +
+                        "Render Infrared: отрисовка в инфракрасном спктре.\n" +
+                        "Render SWIR: отрисовка в коротковолновом инфракрасном спктре.\n" +
+                        "Render Agriculture: отрисовка c выделением растительности.\n" +
+                        "Render Geology: отрисовка с выделением особенностей рельефа.\n" +
+                        "Detect changes: сравнивает 2 изображения на предмет изменений.\n" +
+                        "File: меню работы с файлами для сохранения изображений"
+        );
     }
 
 
@@ -474,6 +488,33 @@ public class MainSceneController {
     private void aboutMenuHandler(ActionEvent event) {
         showAlertMessage("About", "Программа разработана в рамках выполения курсовой работы ОП ПИ НИУ ВШЭ\n " +
                 "Исполнитель: \n Филонов Всеволод Андреевич\n группа БПИ185");
+    }
+
+    @FXML
+    private void colormapMenuHandler(ActionEvent event) {
+
+        Image img;
+        try (var fin = new FileInputStream(config.getProperty("COLORMAP"))) {
+            img = new Image(fin);
+        } catch (IOException ioex) {
+            showAlertMessage("Error.", "Colormap image not found");
+            return;
+        }
+        GridPane grid = new GridPane();
+        ImageView iv = new ImageView();
+        iv.setFitWidth(500);
+        iv.setFitHeight(500);
+        grid.add(iv, 0, 0);
+        iv.setImage(img);
+        iv.setPreserveRatio(true);
+
+        Stage stg = new Stage();
+        Scene sc = new Scene(grid, 500, 500);
+        iv.fitWidthProperty().bind(sc.widthProperty());
+        iv.fitHeightProperty().bind(sc.heightProperty());
+        stg.setScene(sc);
+        stg.show();
+
     }
 
     /**
