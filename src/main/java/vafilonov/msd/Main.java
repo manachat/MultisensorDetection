@@ -41,7 +41,7 @@ public class Main extends Application {
 
         MainSceneController controller = loader.getController();
         controller.postInitialize(stage, prop);
-
+        stage.setTitle("Multisensor detection");
         stage.show();
      }
 

@@ -2,7 +2,6 @@ package vafilonov.msd.controllers;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
@@ -29,11 +28,9 @@ import vafilonov.msd.core.sentinel2.utils.Constants;
 import vafilonov.msd.core.sentinel2.utils.Sentinel2Band;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
