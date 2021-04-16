@@ -454,7 +454,7 @@ public class MainSceneController {
         // choose filepath
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Save session");
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("IHR", "*.ihr"));
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG", "*.png"));
         File path = chooser.showSaveDialog(scene.getWindow());
 
         // user haven't aborted choice
